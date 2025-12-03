@@ -5,17 +5,18 @@ type ScrollSpyOptions = {
   rootMargin?: string;
   // More thresholds = finer detection
   threshold?: number | number[];
-  // Debounce delay in ms to prevent rapid state changes during fast scrolling
-  debounceMs?: number;
+  // Lock duration in ms after programmatic scroll (click navigation)
+  scrollLockMs?: number;
 };
 
 export function useScrollSpy(
   sectionIds: string[],
-  { rootMargin = "0px 0px -50% 0px", threshold = [0, 0.25, 0.5, 0.75, 1], debounceMs = 100 }: ScrollSpyOptions = {}
+  { rootMargin = "0px 0px -50% 0px", threshold = [0, 0.25, 0.5, 0.75, 1], scrollLockMs = 800 }: ScrollSpyOptions = {}
 ) {
   const [activeId, setActiveId] = useState<string | null>(sectionIds[0] || null);
   const refs = useRef<Record<string, HTMLElement | null>>({});
-  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isLockedRef = useRef(false);
+  const lockTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Callback to attach refs to sections
   const registerRef = useCallback((id: string) => (el: HTMLElement | null) => {
@@ -26,6 +27,28 @@ export function useScrollSpy(
     }
   }, []);
 
+  // Function to scroll to a section with lock (for click navigation)
+  const scrollToSection = useCallback((id: string) => {
+    // Lock the scroll spy to prevent intermediate activations
+    isLockedRef.current = true;
+    
+    // Clear any existing lock timer
+    if (lockTimerRef.current) {
+      clearTimeout(lockTimerRef.current);
+    }
+    
+    // Immediately set the target as active
+    setActiveId(id);
+    
+    // Perform the scroll
+    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    
+    // Unlock after scroll animation completes
+    lockTimerRef.current = setTimeout(() => {
+      isLockedRef.current = false;
+    }, scrollLockMs);
+  }, [scrollLockMs]);
+
   useEffect(() => {
     const elements = sectionIds
       .map((id) => refs.current[id])
@@ -33,10 +56,11 @@ export function useScrollSpy(
 
     if (!elements.length) return;
 
-    let pendingActiveId: string | null = null;
-
     const observer = new IntersectionObserver(
       (entries) => {
+        // Skip if scroll spy is locked (during programmatic navigation)
+        if (isLockedRef.current) return;
+
         // Sort by visible ratio to find the most visible section
         const visibleEntries = entries
           .filter((entry) => entry.isIntersecting)
@@ -47,18 +71,8 @@ export function useScrollSpy(
         const best = visibleEntries[0];
         const newActiveId = best.target.getAttribute("data-scrollspy-id");
 
-        if (newActiveId && newActiveId !== pendingActiveId) {
-          pendingActiveId = newActiveId;
-          
-          // Clear existing debounce timer
-          if (debounceTimerRef.current) {
-            clearTimeout(debounceTimerRef.current);
-          }
-          
-          // Debounce the state update to prevent rapid changes during fast scrolling
-          debounceTimerRef.current = setTimeout(() => {
-            setActiveId(newActiveId);
-          }, debounceMs);
+        if (newActiveId) {
+          setActiveId(newActiveId);
         }
       },
       {
@@ -72,11 +86,11 @@ export function useScrollSpy(
 
     return () => {
       observer.disconnect();
-      if (debounceTimerRef.current) {
-        clearTimeout(debounceTimerRef.current);
+      if (lockTimerRef.current) {
+        clearTimeout(lockTimerRef.current);
       }
     };
-  }, [sectionIds, rootMargin, threshold, debounceMs]);
+  }, [sectionIds, rootMargin, threshold]);
 
-  return { activeId, registerRef };
+  return { activeId, registerRef, scrollToSection };
 }

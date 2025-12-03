@@ -15,11 +15,7 @@ const SECTIONS = [
 ];
 
 const Index = () => {
-  const { activeId, registerRef } = useScrollSpy(SECTIONS.map((s) => s.id));
-
-  const scrollToSection = (id: string) => {
-    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
-  };
+  const { activeId, registerRef, scrollToSection } = useScrollSpy(SECTIONS.map((s) => s.id));
 
   return (
     <>
