@@ -173,60 +173,66 @@ const HYSTERESIS_SCORE_MARGIN = 150;
 const DEBUG_STYLES = __DEV__ ? {
     overlay: {
         position: 'fixed' as const,
-        top: '10px',
-        right: '10px',
-        width: '300px',
-        maxHeight: '400px',
+        top: '16px',
+        right: '16px',
+        width: '260px',
+        maxHeight: '420px',
         overflowY: 'auto' as const,
-        backgroundColor: 'rgba(0, 0, 0, 0.85)',
-        color: '#fff',
-        padding: '12px',
-        borderRadius: '8px',
+        background: 'linear-gradient(145deg, rgba(24, 24, 27, 0.98), rgba(17, 17, 20, 0.98))',
+        backdropFilter: 'blur(12px)',
+        color: '#e4e4e7',
+        padding: '16px',
+        borderRadius: '12px',
         fontSize: '11px',
-        fontFamily: 'monospace',
+        fontFamily: '"SF Mono", "Fira Code", "JetBrains Mono", monospace',
         zIndex: 9999,
-        boxShadow: '0 4px 12px rgba(0,0,0,0.3)'
+        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.05)',
+        border: '1px solid rgba(255, 255, 255, 0.08)'
     },
     triggerLine: {
         position: 'fixed' as const,
         left: 0,
         right: 0,
-        height: '2px',
-        backgroundColor: 'rgba(255, 0, 0, 0.8)',
+        height: '1px',
+        background: 'linear-gradient(90deg, transparent, #a855f7, #a855f7, transparent)',
         zIndex: 9998,
         pointerEvents: 'none' as const
     },
     sectionActive: {
-        outline: '3px solid rgba(0, 255, 0, 0.8)',
-        outlineOffset: '-3px'
-    },
-    sectionInactive: {
-        outline: '2px dashed rgba(255, 165, 0, 0.6)',
+        outline: '2px solid rgba(168, 85, 247, 0.6)',
         outlineOffset: '-2px'
     },
+    sectionInactive: {
+        outline: '1px dashed rgba(168, 85, 247, 0.25)',
+        outlineOffset: '-1px'
+    },
     header: {
-        fontWeight: 'bold' as const,
-        marginBottom: '8px',
-        paddingBottom: '6px',
-        borderBottom: '1px solid rgba(255,255,255,0.3)'
+        fontWeight: '600' as const,
+        marginBottom: '12px',
+        paddingBottom: '10px',
+        borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+        fontSize: '12px',
+        letterSpacing: '0.02em'
     },
     stat: {
         display: 'flex' as const,
         justifyContent: 'space-between' as const,
-        marginBottom: '4px'
+        marginBottom: '6px',
+        padding: '4px 0'
     },
     sectionItem: {
-        padding: '6px',
-        marginBottom: '4px',
-        borderRadius: '4px'
+        padding: '10px',
+        marginBottom: '6px',
+        borderRadius: '8px',
+        transition: 'all 0.15s ease'
     },
     activeSection: {
-        backgroundColor: 'rgba(0, 255, 0, 0.2)',
-        border: '1px solid rgba(0, 255, 0, 0.5)'
+        background: 'linear-gradient(135deg, rgba(168, 85, 247, 0.15), rgba(168, 85, 247, 0.08))',
+        border: '1px solid rgba(168, 85, 247, 0.4)'
     },
     inactiveSection: {
-        backgroundColor: 'rgba(255, 255, 255, 0.05)',
-        border: '1px solid rgba(255, 255, 255, 0.1)'
+        backgroundColor: 'rgba(255, 255, 255, 0.02)',
+        border: '1px solid rgba(255, 255, 255, 0.05)'
     }
 } : null;
 
@@ -630,52 +636,73 @@ export const useScrollSpy = (
                 <div style={ { ...DEBUG_STYLES.triggerLine, top: `${triggerLineTop}px` } }>
                     <span style={ {
                         position: 'absolute',
-                        left: '10px',
-                        top: '-18px',
-                        backgroundColor: 'rgba(255, 0, 0, 0.9)',
+                        left: '16px',
+                        top: '-24px',
+                        background: 'linear-gradient(135deg, #a855f7, #7c3aed)',
                         color: '#fff',
-                        padding: '2px 6px',
-                        borderRadius: '3px',
-                        fontSize: '10px'
+                        padding: '4px 10px',
+                        borderRadius: '6px',
+                        fontSize: '10px',
+                        fontWeight: '500',
+                        fontFamily: '"SF Mono", monospace',
+                        boxShadow: '0 2px 8px rgba(168, 85, 247, 0.3)'
                     } }>
-                        { `Trigger Line (${Math.round(debugInfo.offsetEffective)}px)` }
+                        { `↓ ${Math.round(debugInfo.offsetEffective)}px` }
                     </span>
                 </div>
                 <div style={ DEBUG_STYLES.overlay }>
                     <div style={ DEBUG_STYLES.header }>
-                        { '🔍 ScrollSpy Debug' }
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <span style={{ 
+                                width: '8px', 
+                                height: '8px', 
+                                borderRadius: '50%', 
+                                background: '#a855f7',
+                                boxShadow: '0 0 8px rgba(168, 85, 247, 0.5)'
+                            }} />
+                            { 'paradice' }
+                            <span style={{ opacity: 0.5, fontWeight: 'normal' }}>debug</span>
+                        </div>
                     </div>
-                    <div style={ DEBUG_STYLES.stat }>
-                        <span>{ 'Scroll Y:' }</span>
-                        <span>{ `${Math.round(debugInfo.scrollY)}px` }</span>
+                    
+                    <div style={{ 
+                        display: 'grid', 
+                        gridTemplateColumns: '1fr 1fr', 
+                        gap: '8px', 
+                        marginBottom: '12px',
+                        padding: '10px',
+                        background: 'rgba(0, 0, 0, 0.2)',
+                        borderRadius: '8px'
+                    }}>
+                        <div style={{ textAlign: 'center' }}>
+                            <div style={{ fontSize: '16px', fontWeight: '600', color: '#fff' }}>
+                                { Math.round(debugInfo.scrollY) }
+                            </div>
+                            <div style={{ fontSize: '9px', opacity: 0.5, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                                scroll
+                            </div>
+                        </div>
+                        <div style={{ textAlign: 'center' }}>
+                            <div style={{ fontSize: '16px', fontWeight: '600', color: '#a855f7' }}>
+                                { Math.round(debugInfo.offsetEffective) }
+                            </div>
+                            <div style={{ fontSize: '9px', opacity: 0.5, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                                offset
+                            </div>
+                        </div>
                     </div>
-                    <div style={ DEBUG_STYLES.stat }>
-                        <span>{ 'Trigger Line:' }</span>
-                        <span>{ `${Math.round(debugInfo.triggerLine)}px` }</span>
+
+                    <div style={{ 
+                        fontSize: '9px', 
+                        opacity: 0.4, 
+                        textTransform: 'uppercase', 
+                        letterSpacing: '0.1em',
+                        marginBottom: '8px',
+                        marginTop: '4px'
+                    }}>
+                        Sections
                     </div>
-                    <div style={ DEBUG_STYLES.stat }>
-                        <span>{ 'Viewport Height:' }</span>
-                        <span>{ `${debugInfo.viewportHeight}px` }</span>
-                    </div>
-                    <div style={ DEBUG_STYLES.stat }>
-                        <span>{ 'Offset (base):' }</span>
-                        <span>{ `${debugInfo.offsetBase}px` }</span>
-                    </div>
-                    <div style={ DEBUG_STYLES.stat }>
-                        <span>{ 'Offset (effective):' }</span>
-                        <span style={ { color: debugInfo.offsetEffective > debugInfo.offsetBase ? '#0ff' : '#fff' } }>
-                            { `${Math.round(debugInfo.offsetEffective)}px` }
-                        </span>
-                    </div>
-                    <div style={ { ...DEBUG_STYLES.stat, marginTop: '8px', marginBottom: '8px' } }>
-                        <span>{ 'Active:' }</span>
-                        <span style={ { color: '#0f0' } }>
-                            { activeId ? activeId.slice(0, 8) + '...' : 'none' }
-                        </span>
-                    </div>
-                    <div style={ { fontWeight: 'bold', marginBottom: '6px' } }>
-                        { 'Sections:' }
-                    </div>
+                    
                     {
                         debugInfo.sections.map((section) => (
                             <div
@@ -687,16 +714,52 @@ export const useScrollSpy = (
                                         : DEBUG_STYLES.inactiveSection)
                                 } }
                             >
-                                <div style={ { fontWeight: section.isActive ? 'bold' : 'normal' } }>
-                                    { section.isActive ? '✓ ' : '  ' }
-                                    { section.id.slice(0, 12) }
-                                    { section.id.length > 12 ? '...' : '' }
+                                <div style={{ 
+                                    display: 'flex', 
+                                    justifyContent: 'space-between', 
+                                    alignItems: 'center',
+                                    marginBottom: '6px'
+                                }}>
+                                    <span style={{ 
+                                        fontWeight: section.isActive ? '600' : '400',
+                                        color: section.isActive ? '#fff' : '#a1a1aa'
+                                    }}>
+                                        { section.isActive && <span style={{ color: '#a855f7', marginRight: '4px' }}>●</span> }
+                                        { section.id }
+                                    </span>
+                                    <span style={{ 
+                                        fontSize: '10px',
+                                        color: section.isActive ? '#a855f7' : '#71717a',
+                                        fontWeight: '500'
+                                    }}>
+                                        { section.score }
+                                    </span>
                                 </div>
-                                <div style={ { fontSize: '10px', opacity: 0.8, marginLeft: '16px' } }>
-                                    { `Score: ${section.score} | Vis: ${Math.round(section.visibilityRatio * 100)}%` }
+                                <div style={{ 
+                                    height: '3px', 
+                                    background: 'rgba(255,255,255,0.1)', 
+                                    borderRadius: '2px',
+                                    overflow: 'hidden'
+                                }}>
+                                    <div style={{ 
+                                        height: '100%', 
+                                        width: `${Math.min(section.visibilityRatio * 100, 100)}%`,
+                                        background: section.isActive 
+                                            ? 'linear-gradient(90deg, #a855f7, #7c3aed)' 
+                                            : 'rgba(255,255,255,0.2)',
+                                        borderRadius: '2px',
+                                        transition: 'width 0.15s ease'
+                                    }} />
                                 </div>
-                                <div style={ { fontSize: '10px', opacity: 0.6, marginLeft: '16px' } }>
-                                    { `Top: ${Math.round(section.bounds.top)}px | H: ${Math.round(section.bounds.height)}px` }
+                                <div style={{ 
+                                    fontSize: '9px', 
+                                    opacity: 0.5, 
+                                    marginTop: '4px',
+                                    display: 'flex',
+                                    justifyContent: 'space-between'
+                                }}>
+                                    <span>{ `${Math.round(section.visibilityRatio * 100)}% visible` }</span>
+                                    <span>{ `${Math.round(section.bounds.height)}px` }</span>
                                 </div>
                             </div>
                         ))
