@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useScrollSpy } from "@/hooks/useScrollSpy";
 import { ArrowUpRight, Copy, Check } from "lucide-react";
 import {
@@ -9,6 +9,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { highlightElement } from "@speed-highlight/core";
 
 const SECTIONS = [
   { id: "intro", label: "Intro" },
@@ -113,6 +114,7 @@ const Index = () => {
   const [hookSourceCode, setHookSourceCode] = useState<string>("");
   const [isLoadingHook, setIsLoadingHook] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const codeRef = useRef<HTMLElement>(null);
   
   // offset: 'auto' (default) automatically detects fixed/sticky elements at top
   // Disable debug mode when modal is open
@@ -126,6 +128,13 @@ const Index = () => {
     e.preventDefault();
     scrollToSection(sectionId);
   };
+
+  // Highlight code when hookSourceCode changes
+  useEffect(() => {
+    if (hookSourceCode && codeRef.current) {
+      highlightElement(codeRef.current, 'ts');
+    }
+  }, [hookSourceCode]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -347,7 +356,7 @@ const Index = () => {
                   ) : hookSourceCode ? (
                     <div className="h-full overflow-y-auto">
                       <pre className="code-block text-xs bg-gray-50 p-4 rounded-md">
-                        <code className="block whitespace-pre font-mono text-[#464647]">{hookSourceCode}</code>
+                        <code ref={codeRef} className="shj-lang-ts block whitespace-pre font-mono">{hookSourceCode}</code>
                       </pre>
                     </div>
                   ) : (
