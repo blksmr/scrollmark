@@ -2,110 +2,52 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
-
 @layer base {
   :root {
-    /* Debug Colors */
-    --debug-menu: 280 70% 50%;
-    --debug-content: 200 70% 50%;
-    --debug-active: 150 70% 45%;
-    --background: 210 20% 98%;
-    --foreground: 215 25% 15%;
-
-    --card: 0 0% 100%;
-    --card-foreground: 215 25% 15%;
-
-    --popover: 0 0% 100%;
-    --popover-foreground: 215 25% 15%;
-
-    --primary: 215 90% 45%;
+    --background: 0 0% 98.4%; /* #fbfbfb */
+    --foreground: 0 0% 27%; /* #464647 */
+    
+    --muted: 0 0% 95%;
+    --muted-foreground: 0 0% 49%; /* #7c7c7c */
+    
+    --card: 0 0% 98.4%;
+    --card-foreground: 0 0% 27%;
+    
+    --popover: 0 0% 98.4%;
+    --popover-foreground: 0 0% 27%;
+    
+    --primary: 270 50% 55%; /* Purple for badges */
     --primary-foreground: 0 0% 100%;
-
-    --secondary: 195 85% 50%;
-    --secondary-foreground: 0 0% 100%;
-
-    --muted: 210 15% 92%;
-    --muted-foreground: 215 15% 45%;
-
-    --accent: 195 85% 50%;
-    --accent-foreground: 215 25% 15%;
-
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 100%;
-
-    --border: 215 20% 88%;
-    --input: 215 20% 88%;
-    --ring: 215 90% 45%;
-
-    --radius: 0.75rem;
-
-    /* Custom tokens for scroll spy */
-    --nav-active: 215 90% 45%;
-    --nav-hover: 210 15% 92%;
-    --progress-bg: 210 15% 92%;
     
-    /* Gradients */
-    --gradient-hero: linear-gradient(135deg, hsl(215 90% 45%) 0%, hsl(195 85% 50%) 100%);
+    --secondary: 0 0% 95%;
+    --secondary-foreground: 0 0% 27%;
     
-    /* Transitions */
-    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --accent: 270 50% 55%;
+    --accent-foreground: 0 0% 100%;
     
-    --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 215 25% 15%;
-    --sidebar-primary: 215 90% 45%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 210 15% 92%;
-    --sidebar-accent-foreground: 215 25% 15%;
-    --sidebar-border: 215 20% 88%;
-    --sidebar-ring: 215 90% 45%;
-  }
-
-  .dark {
-    --background: 215 30% 8%;
-    --foreground: 210 20% 95%;
-
-    --card: 215 25% 12%;
-    --card-foreground: 210 20% 95%;
-
-    --popover: 215 25% 12%;
-    --popover-foreground: 210 20% 95%;
-
-    --primary: 215 90% 55%;
-    --primary-foreground: 0 0% 100%;
-
-    --secondary: 195 85% 55%;
-    --secondary-foreground: 0 0% 100%;
-
-    --muted: 215 20% 18%;
-    --muted-foreground: 215 10% 65%;
-
-    --accent: 195 85% 55%;
-    --accent-foreground: 215 30% 8%;
-
     --destructive: 0 62.8% 50%;
     --destructive-foreground: 0 0% 100%;
-
-    --border: 215 20% 20%;
-    --input: 215 20% 20%;
-    --ring: 215 90% 55%;
-
-    --nav-active: 215 90% 55%;
-    --nav-hover: 215 20% 18%;
-    --progress-bg: 215 20% 18%;
     
-    --gradient-hero: linear-gradient(135deg, hsl(215 90% 55%) 0%, hsl(195 85% 55%) 100%);
+    --border: 0 0% 88%;
+    --input: 0 0% 88%;
+    --ring: 270 50% 55%;
     
-    --sidebar-background: 215 25% 12%;
-    --sidebar-foreground: 210 20% 95%;
-    --sidebar-primary: 215 90% 55%;
+    --radius: 0.25rem;
+    
+    --nav-active: 0 0% 27%;
+    --nav-hover: 0 0% 92%;
+    --progress-bg: 0 0% 92%;
+    
+    --gradient-hero: linear-gradient(135deg, hsl(270 50% 55%) 0%, hsl(270 60% 65%) 100%);
+    
+    --sidebar-background: 0 0% 98.4%;
+    --sidebar-foreground: 0 0% 27%;
+    --sidebar-primary: 270 50% 55%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 215 20% 18%;
-    --sidebar-accent-foreground: 210 20% 95%;
-    --sidebar-border: 215 20% 20%;
-    --sidebar-ring: 215 90% 55%;
+    --sidebar-accent: 0 0% 95%;
+    --sidebar-accent-foreground: 0 0% 27%;
+    --sidebar-border: 0 0% 88%;
+    --sidebar-ring: 270 50% 55%;
   }
 }
 
@@ -113,8 +55,66 @@ All colors MUST be HSL.
   * {
     @apply border-border;
   }
-
-  body {
-    @apply bg-background text-foreground;
+  
+  html {
+    scroll-behavior: smooth;
   }
+  
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+  }
+}
+
+@layer components {
+  .link-hover {
+    @apply underline decoration-gray-300 underline-offset-2 transition-colors duration-200;
+  }
+  
+  .link-hover:hover {
+    @apply decoration-gray-500;
+  }
+  
+  .section-divider {
+    @apply border-t border-gray-200 my-8;
+  }
+  
+  .badge {
+    @apply inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-sm bg-primary text-white ml-2;
+  }
+  
+  .code-block {
+    @apply font-mono text-sm bg-gray-100 px-4 py-3 rounded overflow-x-auto;
+    color: #464647;
+  }
+  
+  .code-inline {
+    @apply font-mono text-sm bg-gray-100 px-1.5 py-0.5 rounded;
+  }
+}
+
+/* Custom scrollbar - minimal */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(0 0% 80%);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(0 0% 70%);
+}
+
+/* Selection */
+::selection {
+  background: hsl(270 50% 55% / 0.2);
 }
