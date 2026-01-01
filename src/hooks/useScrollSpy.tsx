@@ -155,11 +155,30 @@ export const useScrollSpy = (
     const scrollToSection = useCallback((id: string): void => {
         const element = refs.current[id];
         if (element) {
-            element.scrollIntoView({ behavior: 'smooth' });
+            const container = containerRef?.current;
+            const elementRect = element.getBoundingClientRect();
+            
+            if (container) {
+                // Container-based scrolling
+                const containerRect = container.getBoundingClientRect();
+                const relativeTop = elementRect.top - containerRect.top + container.scrollTop;
+                container.scrollTo({
+                    top: relativeTop - offset,
+                    behavior: 'smooth'
+                });
+            } else {
+                // Window-based scrolling
+                const absoluteTop = elementRect.top + window.scrollY;
+                window.scrollTo({
+                    top: absoluteTop - offset,
+                    behavior: 'smooth'
+                });
+            }
+            
             activeIdRef.current = id;
             setActiveId(id);
         }
-    }, []);
+    }, [containerRef, offset]);
 
     useEffect(() => {
         activeIdRef.current = activeId;

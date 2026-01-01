@@ -68,8 +68,20 @@ const LINKS = [
   { label: "Changelog", href: "#" },
 ];
 
+// Offset to account for sticky navbar height
+const NAV_OFFSET = 60;
+
 const Index = () => {
-  const { activeId, registerRef } = useScrollSpy(SECTIONS.map((s) => s.id));
+  const { activeId, registerRef, scrollToSection } = useScrollSpy(
+    SECTIONS.map((s) => s.id),
+    null,
+    { offset: NAV_OFFSET }
+  );
+
+  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, sectionId: string) => {
+    e.preventDefault();
+    scrollToSection(sectionId);
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -79,6 +91,7 @@ const Index = () => {
           <a
             key={section.id}
             href={`#${section.id}`}
+            onClick={(e) => handleNavClick(e, section.id)}
             className="group flex items-center gap-3"
             title={section.label}
           >
@@ -124,6 +137,7 @@ const Index = () => {
                 <li key={section.id}>
                   <a
                     href={`#${section.id}`}
+                    onClick={(e) => handleNavClick(e, section.id)}
                     className={`px-3 py-1 rounded-full transition-all duration-200 ${
                       activeId === section.id
                         ? "bg-foreground text-background shadow-sm"
