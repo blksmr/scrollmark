@@ -300,23 +300,25 @@ const Index = () => {
                   <ArrowUpRight className="w-3 h-3" />
                 </button>
               </DialogTrigger>
-              <DialogContent className="max-w-5xl max-h-[90vh] flex flex-col p-0">
+              <DialogContent className="max-w-5xl h-[90vh] flex flex-col p-0">
                 <DialogHeader className="px-6 pt-6 pb-4 border-b border-border flex-shrink-0">
                   <DialogTitle className="text-lg">useScrollSpy.tsx</DialogTitle>
                   <DialogDescription className="text-sm text-[#7c7c7c]">
                     Copy this hook into your project's hooks folder
                   </DialogDescription>
                 </DialogHeader>
-                <div className="relative flex-1 min-h-0 overflow-hidden p-6">
+                <div className="relative flex-1 min-h-0 p-6">
                   {isLoadingHook ? (
                     <div className="flex items-center justify-center h-full text-[#7c7c7c]">
                       Loading...
                     </div>
                   ) : hookSourceCode ? (
                     <>
-                      <pre className="code-block h-full overflow-auto text-xs bg-gray-50 p-4 rounded-md">
-                        <code className="block whitespace-pre font-mono text-[#464647]">{hookSourceCode}</code>
-                      </pre>
+                      <div className="h-full overflow-y-auto">
+                        <pre className="code-block text-xs bg-gray-50 p-4 rounded-md">
+                          <code className="block whitespace-pre font-mono text-[#464647]">{hookSourceCode}</code>
+                        </pre>
+                      </div>
                       <button
                         onClick={() => {
                           navigator.clipboard.writeText(hookSourceCode);
