@@ -112,12 +112,14 @@ const Index = () => {
   const [copied, setCopied] = useState(false);
   const [hookSourceCode, setHookSourceCode] = useState<string>("");
   const [isLoadingHook, setIsLoadingHook] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   
   // offset: 'auto' (default) automatically detects fixed/sticky elements at top
+  // Disable debug mode when modal is open
   const { activeId, registerRef, scrollToSection } = useScrollSpy(
     SECTIONS.map((s) => s.id),
     null,
-    { debug: debugMode }
+    { debug: debugMode && !isModalOpen }
   );
 
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, sectionId: string) => {
@@ -283,7 +285,12 @@ const Index = () => {
             <p className="text-[#7c7c7c] text-sm">
               Copy the hook into your project:
             </p>
-            <Dialog>
+            <Dialog open={isModalOpen} onOpenChange={(open) => {
+              setIsModalOpen(open);
+              if (open) {
+                setDebugMode(false);
+              }
+            }}>
               <DialogTrigger asChild>
                 <button 
                   className="text-xs px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-foreground rounded-full transition-colors inline-flex items-center gap-1.5"
@@ -301,46 +308,48 @@ const Index = () => {
                 </button>
               </DialogTrigger>
               <DialogContent className="max-w-5xl h-[90vh] flex flex-col p-0">
-                <DialogHeader className="px-6 pt-6 pb-4 border-b border-border flex-shrink-0">
-                  <DialogTitle className="text-lg">useScrollSpy.tsx</DialogTitle>
-                  <DialogDescription className="text-sm text-[#7c7c7c]">
-                    Copy this hook into your project's hooks folder
-                  </DialogDescription>
+                <DialogHeader className="px-6 pt-6 pb-4 border-b border-border flex-shrink-0 flex flex-row items-start justify-between">
+                  <div>
+                    <DialogTitle className="text-lg">useScrollSpy.tsx</DialogTitle>
+                    <DialogDescription className="text-sm text-[#7c7c7c]">
+                      Copy this hook into your project's hooks folder
+                    </DialogDescription>
+                  </div>
+                  {hookSourceCode && (
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText(hookSourceCode);
+                        setCopied(true);
+                        setTimeout(() => setCopied(false), 2000);
+                      }}
+                      className="p-2.5 bg-background border border-border rounded-md hover:bg-gray-50 transition-colors shadow-sm flex items-center gap-2 text-sm"
+                      title="Copy code"
+                    >
+                      {copied ? (
+                        <>
+                          <Check className="w-4 h-4 text-[#059669]" />
+                          <span className="text-xs text-[#059669]">Copied!</span>
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="w-4 h-4" />
+                          <span className="text-xs">Copy</span>
+                        </>
+                      )}
+                    </button>
+                  )}
                 </DialogHeader>
-                <div className="relative flex-1 min-h-0 p-6">
+                <div className="flex-1 min-h-0 p-6">
                   {isLoadingHook ? (
                     <div className="flex items-center justify-center h-full text-[#7c7c7c]">
                       Loading...
                     </div>
                   ) : hookSourceCode ? (
-                    <>
-                      <div className="h-full overflow-y-auto">
-                        <pre className="code-block text-xs bg-gray-50 p-4 rounded-md">
-                          <code className="block whitespace-pre font-mono text-[#464647]">{hookSourceCode}</code>
-                        </pre>
-                      </div>
-                      <button
-                        onClick={() => {
-                          navigator.clipboard.writeText(hookSourceCode);
-                          setCopied(true);
-                          setTimeout(() => setCopied(false), 2000);
-                        }}
-                        className="absolute top-8 right-8 p-2.5 bg-background border border-border rounded-md hover:bg-gray-50 transition-colors shadow-sm z-10 flex items-center gap-2 text-sm"
-                        title="Copy code"
-                      >
-                        {copied ? (
-                          <>
-                            <Check className="w-4 h-4 text-[#059669]" />
-                            <span className="text-xs text-[#059669]">Copied!</span>
-                          </>
-                        ) : (
-                          <>
-                            <Copy className="w-4 h-4" />
-                            <span className="text-xs">Copy</span>
-                          </>
-                        )}
-                      </button>
-                    </>
+                    <div className="h-full overflow-y-auto">
+                      <pre className="code-block text-xs bg-gray-50 p-4 rounded-md">
+                        <code className="block whitespace-pre font-mono text-[#464647]">{hookSourceCode}</code>
+                      </pre>
+                    </div>
                   ) : (
                     <div className="flex items-center justify-center h-full text-[#7c7c7c]">
                       Click "View hook" to load the source code
