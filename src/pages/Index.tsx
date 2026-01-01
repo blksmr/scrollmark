@@ -1,6 +1,14 @@
 import { useState } from "react";
 import { useScrollSpy } from "@/hooks/useScrollSpy";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, Copy, Check } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 const SECTIONS = [
   { id: "intro", label: "Intro" },
@@ -79,8 +87,448 @@ const LINKS = [
   { label: "Examples", href: "#" },
 ];
 
+// Hook source code - loaded dynamically
+let HOOK_SOURCE_CODE_CACHE: string | null = null;
+
+const loadHookSource = async (): Promise<string> => {
+  if (HOOK_SOURCE_CODE_CACHE) return HOOK_SOURCE_CODE_CACHE;
+  
+  try {
+    const response = await fetch('/useScrollSpy.tsx');
+    const text = await response.text();
+    HOOK_SOURCE_CODE_CACHE = text;
+    return text;
+  } catch {
+    // Fallback message if fetch fails
+    return `// useScrollSpy hook
+// Unable to load source code
+// Please visit the GitHub repo to get the complete source code
+`;
+  }
+};
+import {
+    useRef,
+    useState,
+    useEffect,
+    useCallback,
+    useLayoutEffect
+}                            from 'react';
+import { createRoot }        from 'react-dom/client';
+import type { RefObject }    from 'react';
+import type { Root }         from 'react-dom/client';
+
+const __DEV__ = import.meta.env.DEV;
+
+type ScrollSpyOptions = {
+    offset?: number | 'auto';
+    offsetRatio?: number;
+    debounceMs?: number;
+    debug?: boolean;
+};
+
+/**
+ * Detects fixed/sticky elements currently at the top of the viewport.
+ * Returns the bottom edge of the lowest overlapping element.
+ */
+const detectTopOverlayHeight = (): number => {
+    let maxBottom = 0;
+
+    const allElements = document.querySelectorAll('*');
+
+    for (const el of allElements) {
+        if (el === document.documentElement || el === document.body) continue;
+
+        const htmlEl = el as HTMLElement;
+        
+        // Skip debug overlay elements by ID
+        if (htmlEl.id === 'scrollspy-debug-root') continue;
+        
+        const style = window.getComputedStyle(el);
+        const position = style.position;
+
+        if (position !== 'fixed' && position !== 'sticky') continue;
+
+        // Skip debug overlay elements by checking z-index (debug overlay uses 9999, trigger line uses 9998)
+        const zIndex = parseInt(style.zIndex, 10);
+        if (!isNaN(zIndex) && zIndex >= 9998) continue;
+
+        // Skip elements that are part of the debug overlay by checking parent
+        let parent = htmlEl.parentElement;
+        let isDebugElement = false;
+        while (parent && parent !== document.body) {
+            if (parent.id === 'scrollspy-debug-root') {
+                isDebugElement = true;
+                break;
+            }
+            parent = parent.parentElement;
+        }
+        if (isDebugElement) continue;
+
+        const rect = el.getBoundingClientRect();
+
+        if (rect.top >= 0 && rect.top <= 50 && rect.height > 0 && rect.width > 0) {
+            maxBottom = Math.max(maxBottom, rect.bottom);
+        }
+    }
+
+    return maxBottom;
+};
+
+type SectionBounds = {
+    id: string;
+    top: number;
+    bottom: number;
+    height: number;
+};
+
+type DebugInfo = {
+    scrollY: number;
+    triggerLine: number;
+    viewportHeight: number;
+    offsetBase: number;
+    offsetEffective: number;
+    sections: Array<{
+        id: string;
+        score: number;
+        isActive: boolean;
+        bounds: SectionBounds;
+        visibilityRatio: number;
+    }>;
+};
+
+type UseScrollSpyReturn = {
+    activeId: string | null;
+    registerRef: (id: string) => (el: HTMLElement | null) => void;
+    scrollToSection: (id: string) => void;
+};
+
+type SectionScore = {
+    id: string;
+    score: number;
+    visibilityRatio: number;
+    distanceFromTrigger: number;
+    isInViewport: boolean;
+    bounds: SectionBounds;
+};
+
+const VISIBILITY_THRESHOLD = 0.6;
+const HYSTERESIS_SCORE_MARGIN = 150;
+
+export const useScrollSpy = (
+    sectionIds: string[],
+    containerRef: RefObject<HTMLElement> | null = null,
+    { offset = 'auto', offsetRatio = 0.08, debounceMs = 10, debug = false }: ScrollSpyOptions = {}
+): UseScrollSpyReturn => {
+    const isDebugEnabled = __DEV__ && debug;
+
+    // States
+    const [activeId, setActiveId] = useState<string | null>(sectionIds[0] || null);
+    const [debugInfo, setDebugInfo] = useState<DebugInfo | null>(null);
+    const [detectedOffset, setDetectedOffset] = useState<number>(() => {
+        if (offset === 'auto' && typeof window !== 'undefined') {
+            return detectTopOverlayHeight();
+        }
+        return 0;
+    });
+
+    // Refs
+    const refs = useRef<Record<string, HTMLElement | null>>({});
+    const activeIdRef = useRef<string | null>(sectionIds[0] || null);
+    const lastScrollY = useRef<number>(0);
+    const lastActiveScore = useRef<number>(0);
+    const rafId = useRef<number | null>(null);
+    const isThrottled = useRef<boolean>(false);
+    const throttleTimeoutId = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const hasPendingScroll = useRef<boolean>(false);
+    const debugContainerRef = useRef<HTMLDivElement | null>(null);
+    const debugRootRef = useRef<Root | null>(null);
+    const lastDebugUpdate = useRef<number>(0);
+    const debugUpdateTimeoutId = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    // Get effective offset (auto-detect or manual)
+    const getEffectiveOffset = useCallback((): number => {
+        if (offset === 'auto') {
+            return detectedOffset || detectTopOverlayHeight();
+        }
+        return offset;
+    }, [offset, detectedOffset]);
+
+    // Detect overlay elements on mount and resize
+    useLayoutEffect(() => {
+        if (offset !== 'auto') return;
+
+        const updateDetectedOffset = () => {
+            const detected = detectTopOverlayHeight();
+            setDetectedOffset(detected);
+        };
+
+        updateDetectedOffset();
+        
+        let resizeTimeout: ReturnType<typeof setTimeout>;
+        const handleResize = () => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(updateDetectedOffset, 100);
+        };
+        window.addEventListener('resize', handleResize);
+        
+        return () => {
+            clearTimeout(resizeTimeout);
+            window.removeEventListener('resize', handleResize);
+        };
+    }, [offset]);
+
+    // Re-detect overlay when debug mode changes
+    useLayoutEffect(() => {
+        if (offset !== 'auto') return;
+        
+        const timeoutId = setTimeout(() => {
+            const detected = detectTopOverlayHeight();
+            setDetectedOffset(detected);
+        }, 0);
+        
+        return () => clearTimeout(timeoutId);
+    }, [offset, isDebugEnabled]);
+
+    // Callbacks
+    const registerRef = useCallback((id: string) => (el: HTMLElement | null) => {
+        if (el) {
+            refs.current[id] = el;
+        } else {
+            delete refs.current[id];
+        }
+    }, []);
+
+    const scrollToSection = useCallback((id: string): void => {
+        const element = refs.current[id];
+        if (element) {
+            const container = containerRef?.current;
+            const elementRect = element.getBoundingClientRect();
+            
+            const effectiveOffset = getEffectiveOffset() + 10;
+            
+            if (container) {
+                const containerRect = container.getBoundingClientRect();
+                const relativeTop = elementRect.top - containerRect.top + container.scrollTop;
+                container.scrollTo({
+                    top: relativeTop - effectiveOffset,
+                    behavior: 'smooth'
+                });
+            } else {
+                const absoluteTop = elementRect.top + window.scrollY;
+                window.scrollTo({
+                    top: absoluteTop - effectiveOffset,
+                    behavior: 'smooth'
+                });
+            }
+            
+            activeIdRef.current = id;
+            setActiveId(id);
+        }
+    }, [containerRef, getEffectiveOffset]);
+
+    useEffect(() => {
+        activeIdRef.current = activeId;
+    }, [activeId]);
+
+    const getSectionBounds = useCallback((): SectionBounds[] => {
+        const container = containerRef?.current;
+        const scrollTop = container ? container.scrollTop : window.scrollY;
+        const containerTop = container ? container.getBoundingClientRect().top : 0;
+
+        return sectionIds
+            .map((id) => {
+                const el = refs.current[id];
+                if (!el) return null;
+                const rect = el.getBoundingClientRect();
+                const relativeTop = container 
+                    ? rect.top - containerTop + scrollTop
+                    : rect.top + window.scrollY;
+                return {
+                    id,
+                    top: relativeTop,
+                    bottom: relativeTop + rect.height,
+                    height: rect.height
+                };
+            })
+            .filter((bounds): bounds is SectionBounds => bounds !== null);
+    }, [sectionIds, containerRef]);
+
+    const calculateActiveSection = useCallback(() => {
+        const container = containerRef?.current;
+        const currentActiveId = activeIdRef.current;
+        const scrollY = container ? container.scrollTop : window.scrollY;
+        const viewportHeight = container ? container.clientHeight : window.innerHeight;
+        const scrollHeight = container ? container.scrollHeight : document.documentElement.scrollHeight;
+        const scrollDirection = scrollY > lastScrollY.current ? 'down' : 'up';
+        lastScrollY.current = scrollY;
+
+        const sections = getSectionBounds();
+        if (sections.length === 0) return;
+
+        const baseOffset = getEffectiveOffset();
+        const effectiveOffset = Math.max(baseOffset, viewportHeight * offsetRatio);
+        const triggerLine = scrollY + effectiveOffset;
+        const viewportTop = scrollY;
+        const viewportBottom = scrollY + viewportHeight;
+
+        const isAtBottom = scrollY + viewportHeight >= scrollHeight - 5;
+        if (isAtBottom && sectionIds.length > 0) {
+            const lastId = sectionIds[sectionIds.length - 1];
+            activeIdRef.current = lastId;
+            setActiveId((prev) => (prev !== lastId ? lastId : prev));
+            return;
+        }
+
+        const isAtTop = scrollY <= 5;
+        if (isAtTop && sectionIds.length > 0) {
+            const firstId = sectionIds[0];
+            activeIdRef.current = firstId;
+            setActiveId((prev) => (prev !== firstId ? firstId : prev));
+            return;
+        }
+
+        const scores: SectionScore[] = sections.map((section) => {
+            const visibleTop = Math.max(section.top, viewportTop);
+            const visibleBottom = Math.min(section.bottom, viewportBottom);
+            const visibleHeight = Math.max(0, visibleBottom - visibleTop);
+            const visibilityRatio = section.height > 0 ? visibleHeight / section.height : 0;
+            const visibleInViewportRatio = viewportHeight > 0 ? visibleHeight / viewportHeight : 0;
+            const isInViewport = section.bottom > viewportTop && section.top < viewportBottom;
+
+            let score = 0;
+
+            if (visibilityRatio >= VISIBILITY_THRESHOLD) {
+                score += 1000 + (visibilityRatio * 500);
+            } else if (isInViewport) {
+                score += visibleInViewportRatio * 800;
+            }
+
+            const sectionIndex = sectionIds.indexOf(section.id);
+            if (scrollDirection === 'down' && isInViewport && section.top <= triggerLine && section.bottom > triggerLine) {
+                score += 200;
+            } else if (scrollDirection === 'up' && isInViewport && section.top <= triggerLine && section.bottom > triggerLine) {
+                score += 200;
+            }
+
+            score -= sectionIndex * 0.1;
+
+            return {
+                id: section.id,
+                score,
+                visibilityRatio,
+                distanceFromTrigger: 0,
+                isInViewport,
+                bounds: section
+            };
+        });
+
+        const visibleScores = scores.filter((s) => s.isInViewport);
+        const candidates = visibleScores.length > 0 ? visibleScores : scores;
+        candidates.sort((a, b) => b.score - a.score);
+
+        let newActiveId: string | null = null;
+        if (candidates.length > 0) {
+            const bestCandidate = candidates[0];
+            const currentScore = scores.find((s) => s.id === currentActiveId);
+
+            const shouldSwitch = !currentScore
+                || !currentScore.isInViewport
+                || bestCandidate.score > currentScore.score + HYSTERESIS_SCORE_MARGIN
+                || bestCandidate.id === currentActiveId;
+
+            if (shouldSwitch) {
+                newActiveId = bestCandidate.id;
+                activeIdRef.current = newActiveId;
+                lastActiveScore.current = bestCandidate.score;
+                setActiveId((prev) => (prev !== newActiveId ? newActiveId : prev));
+            } else {
+                newActiveId = currentActiveId;
+                lastActiveScore.current = currentScore.score;
+            }
+        }
+    }, [sectionIds, getEffectiveOffset, offsetRatio, getSectionBounds, containerRef]);
+
+    // Effects
+    useEffect(() => {
+        const container = containerRef?.current;
+        const scrollTarget = container || window;
+
+        const scheduleCalculate = (): void => {
+            if (rafId.current) {
+                cancelAnimationFrame(rafId.current);
+            }
+
+            rafId.current = requestAnimationFrame(() => {
+                rafId.current = null;
+                calculateActiveSection();
+            });
+        };
+
+        const handleScroll = (): void => {
+            if (isThrottled.current) {
+                hasPendingScroll.current = true;
+                return;
+            }
+
+            isThrottled.current = true;
+            hasPendingScroll.current = false;
+
+            if (throttleTimeoutId.current) {
+                clearTimeout(throttleTimeoutId.current);
+            }
+
+            scheduleCalculate();
+
+            throttleTimeoutId.current = setTimeout(() => {
+                isThrottled.current = false;
+                throttleTimeoutId.current = null;
+
+                if (hasPendingScroll.current) {
+                    hasPendingScroll.current = false;
+                    handleScroll();
+                }
+            }, debounceMs);
+        };
+
+        const handleResize = (): void => {
+            scheduleCalculate();
+        };
+
+        calculateActiveSection();
+
+        scrollTarget.addEventListener('scroll', handleScroll, { passive: true });
+        window.addEventListener('resize', handleResize, { passive: true });
+
+        return () => {
+            scrollTarget.removeEventListener('scroll', handleScroll);
+            window.removeEventListener('resize', handleResize);
+            if (rafId.current) {
+                cancelAnimationFrame(rafId.current);
+                rafId.current = null;
+            }
+            if (throttleTimeoutId.current) {
+                clearTimeout(throttleTimeoutId.current);
+                throttleTimeoutId.current = null;
+            }
+            isThrottled.current = false;
+            hasPendingScroll.current = false;
+        };
+    }, [calculateActiveSection, debounceMs, containerRef]);
+
+    return {
+        activeId,
+        registerRef,
+        scrollToSection
+    };
+};
+
+export default useScrollSpy;`;
+
 const Index = () => {
   const [debugMode, setDebugMode] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [hookSourceCode, setHookSourceCode] = useState<string>("");
+  const [isLoadingHook, setIsLoadingHook] = useState(false);
   
   // offset: 'auto' (default) automatically detects fixed/sticky elements at top
   const { activeId, registerRef, scrollToSection } = useScrollSpy(
@@ -248,9 +696,75 @@ const Index = () => {
             Getting Started
           </h2>
           
-          <p className="text-[#7c7c7c] text-sm mb-4">
-            Copy the hook into your project:
-          </p>
+          <div className="flex items-center gap-3 mb-4">
+            <p className="text-[#7c7c7c] text-sm">
+              Copy the hook into your project:
+            </p>
+            <Dialog>
+              <DialogTrigger asChild>
+                <button 
+                  className="text-xs px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-foreground rounded-full transition-colors inline-flex items-center gap-1.5"
+                  onClick={async () => {
+                    if (!hookSourceCode && !isLoadingHook) {
+                      setIsLoadingHook(true);
+                      const code = await loadHookSource();
+                      setHookSourceCode(code);
+                      setIsLoadingHook(false);
+                    }
+                  }}
+                >
+                  View hook
+                  <ArrowUpRight className="w-3 h-3" />
+                </button>
+              </DialogTrigger>
+              <DialogContent className="max-w-5xl max-h-[90vh] overflow-hidden flex flex-col p-0">
+                <DialogHeader className="px-6 pt-6 pb-4 border-b border-border">
+                  <DialogTitle className="text-lg">useScrollSpy.tsx</DialogTitle>
+                  <DialogDescription className="text-sm text-[#7c7c7c]">
+                    Copy this hook into your project's hooks folder
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="relative flex-1 overflow-hidden p-6">
+                  {isLoadingHook ? (
+                    <div className="flex items-center justify-center h-full text-[#7c7c7c]">
+                      Loading...
+                    </div>
+                  ) : hookSourceCode ? (
+                    <>
+                      <pre className="code-block h-full overflow-auto text-xs bg-gray-50 p-4 rounded-md">
+                        <code className="block whitespace-pre font-mono text-[#464647]">{hookSourceCode}</code>
+                      </pre>
+                      <button
+                        onClick={() => {
+                          navigator.clipboard.writeText(hookSourceCode);
+                          setCopied(true);
+                          setTimeout(() => setCopied(false), 2000);
+                        }}
+                        className="absolute top-8 right-8 p-2.5 bg-background border border-border rounded-md hover:bg-gray-50 transition-colors shadow-sm z-10 flex items-center gap-2 text-sm"
+                        title="Copy code"
+                      >
+                        {copied ? (
+                          <>
+                            <Check className="w-4 h-4 text-[#059669]" />
+                            <span className="text-xs text-[#059669]">Copied!</span>
+                          </>
+                        ) : (
+                          <>
+                            <Copy className="w-4 h-4" />
+                            <span className="text-xs">Copy</span>
+                          </>
+                        )}
+                      </button>
+                    </>
+                  ) : (
+                    <div className="flex items-center justify-center h-full text-[#7c7c7c]">
+                      Click "View hook" to load the source code
+                    </div>
+                  )}
+                </div>
+              </DialogContent>
+            </Dialog>
+          </div>
           
           <pre className="code-block mb-6">
             <code>
