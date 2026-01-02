@@ -64,27 +64,76 @@ const FEATURES = [
   },
 ];
 
-const API_ITEMS = [
+const API_ARGUMENTS = [
   {
-    name: "useScrollSpy(sectionIds, containerRef?, options?)",
-    description: "Main hook that tracks which section is currently in view.",
+    name: "sectionIds",
+    type: "string[]",
+    description: "Array of section IDs to track.",
   },
   {
+    name: "containerRef",
+    type: "RefObject<HTMLElement> | null",
+    description: "Optional scrollable container. Defaults to window.",
+  },
+  {
+    name: "options",
+    type: "ScrollSpyOptions",
+    description: "Configuration options (see below).",
+  },
+];
+
+const API_OPTIONS = [
+  {
+    name: "offset",
+    type: "number | 'auto'",
+    default: "'auto'",
+    description: "Trigger offset from top. 'auto' detects sticky/fixed headers.",
+  },
+  {
+    name: "offsetRatio",
+    type: "number",
+    default: "0.08",
+    description: "Viewport ratio for trigger line calculation.",
+  },
+  {
+    name: "debounceMs",
+    type: "number",
+    default: "10",
+    description: "Throttle delay in milliseconds.",
+  },
+  {
+    name: "debug",
+    type: "boolean",
+    default: "false",
+    description: "Enables debug mode with debugInfo in return value.",
+  },
+];
+
+const API_RETURNS = [
+  {
     name: "activeId",
-    description: "The ID of the currently active section, or null.",
+    type: "string | null",
+    description: "The ID of the currently active section.",
   },
   {
     name: "registerRef(id)",
-    description: "Returns a ref callback to attach to each section element.",
+    type: "(el: HTMLElement | null) => void",
+    description: "Ref callback to attach to each section element.",
   },
   {
     name: "scrollToSection(id)",
+    type: "(id: string) => void",
     description: "Programmatically scroll to a specific section.",
+  },
+  {
+    name: "debugInfo",
+    type: "DebugInfo",
+    description: "Debug data (only when debug: true).",
   },
 ];
 
 const LINKS = [
-  { label: "GitHub", href: "https://github.com" },
+  { label: "GitHub", href: "https://github.com/blksmr/paradice" },
   { label: "Copy Hook", href: "#getting-started" },
   { label: "Examples", href: "#" },
 ];
@@ -132,30 +181,19 @@ const Index = () => {
   
   const showDebug = debugMode && !isModalOpen;
 
-  const { activeId, registerRef, scrollToSection, debugInfo } = useScrollSpy(
+  const scrollSpyResult = useScrollSpy(
     SECTIONS.map((s) => s.id),
     null,
-    { debug: true }
+    showDebug ? { debug: true } : {}
   );
+
+  const { activeId, registerRef, scrollToSection } = scrollSpyResult;
+  const debugInfo = showDebug ? scrollSpyResult.debugInfo : null;
 
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, sectionId: string) => {
     e.preventDefault();
     scrollToSection(sectionId);
   };
-
-  // Force recalculation when debug mode is enabled
-  useEffect(() => {
-    if (showDebug && debugInfo.sections.length === 0) {
-      // Small delay to ensure sections are registered, then trigger scroll event
-      const timeoutId = setTimeout(() => {
-        // Trigger a resize event to force recalculation
-        window.dispatchEvent(new Event('resize'));
-        // Also trigger scroll to ensure calculateActiveSection is called
-        window.dispatchEvent(new Event('scroll'));
-      }, 100);
-      return () => clearTimeout(timeoutId);
-    }
-  }, [showDebug, debugInfo.sections.length]);
 
   // Highlight code when hookSourceCode changes or modal opens
   useLayoutEffect(() => {
@@ -451,26 +489,57 @@ const Index = () => {
           <h2 className="text-foreground font-medium mb-6">
             API
           </h2>
-          
-          <ul className="space-y-4">
-            {API_ITEMS.map((item) => (
-              <li key={item.name}>
-                <code className="code-inline text-foreground">
-                  {item.name}
-                </code>
-                <p className="text-[#9d9d9d] text-sm mt-1">
-                  {item.description}
-                </p>
-              </li>
-            ))}
-          </ul>
-          
-          <div className="mt-6 p-4 bg-gray-50 rounded text-sm text-[#7c7c7c]">
-            <span className="text-foreground">Options:</span>
-            <ul className="mt-2 space-y-1 text-[#9d9d9d]">
-              <li>• <code className="code-inline">offset</code> — Trigger offset in pixels (default: 100)</li>
-              <li>• <code className="code-inline">debounceMs</code> — Debounce delay (default: 10)</li>
-            </ul>
+
+          <div className="space-y-6">
+            <div>
+              <h3 className="text-foreground text-sm font-medium mb-3">Arguments</h3>
+              <ul className="space-y-3">
+                {API_ARGUMENTS.map((item) => (
+                  <li key={item.name}>
+                    <div className="flex items-baseline gap-2">
+                      <code className="code-inline text-foreground">{item.name}</code>
+                      <span className="text-[#9d9d9d] text-xs">{item.type}</span>
+                    </div>
+                    <p className="text-[#9d9d9d] text-sm mt-1">{item.description}</p>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="section-divider" />
+
+            <div>
+              <h3 className="text-foreground text-sm font-medium mb-3">Options</h3>
+              <ul className="space-y-3">
+                {API_OPTIONS.map((item) => (
+                  <li key={item.name}>
+                    <div className="flex items-baseline gap-2 flex-wrap">
+                      <code className="code-inline text-foreground">{item.name}</code>
+                      <span className="text-[#9d9d9d] text-xs">{item.type}</span>
+                      <span className="text-[#7c7c7c] text-xs">= {item.default}</span>
+                    </div>
+                    <p className="text-[#9d9d9d] text-sm mt-1">{item.description}</p>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="section-divider" />
+
+            <div>
+              <h3 className="text-foreground text-sm font-medium mb-3">Returns</h3>
+              <ul className="space-y-3">
+                {API_RETURNS.map((item) => (
+                  <li key={item.name}>
+                    <div className="flex items-baseline gap-2 flex-wrap">
+                      <code className="code-inline text-foreground">{item.name}</code>
+                      <span className="text-[#9d9d9d] text-xs">{item.type}</span>
+                    </div>
+                    <p className="text-[#9d9d9d] text-sm mt-1">{item.description}</p>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
         </section>
 
@@ -484,11 +553,10 @@ const Index = () => {
                 <a 
                   href={link.href}
                   className="text-[#7c7c7c] link-hover text-sm inline-flex items-center gap-1"
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  {...(link.label !== "Copy Hook" && { target: "_blank", rel: "noopener noreferrer" })}
                 >
                   {link.label}
-                  <ArrowUpRight className="w-3 h-3" />
+                  {link.label !== "Copy Hook" && <ArrowUpRight className="w-3 h-3" />}
                 </a>
               </li>
             ))}
@@ -502,8 +570,8 @@ const Index = () => {
           <p>© 2026 paradice</p>
           <p className="mt-1">
             Made with ☕ by{" "}
-            <a href="#" className="link-hover">
-              @developer
+            <a href="https://x.com/blkasmir" className="link-hover">
+              @blksmr
             </a>
           </p>
           <p className="mt-3 text-[#c0c0c0]">
@@ -512,7 +580,7 @@ const Index = () => {
         </div>
       </main>
 
-      {showDebug && (
+      {showDebug && debugInfo && (
         <ScrollSpyDebugOverlay
           debugInfo={debugInfo}
           activeId={activeId}

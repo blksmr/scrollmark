@@ -1,4 +1,4 @@
-import { useEffect, useRef, useMemo } from 'react';
+import { useEffect, useRef, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import type { RefObject } from 'react';
 import type { DebugInfo } from './useScrollSpy';
@@ -22,18 +22,18 @@ export function ScrollSpyDebugOverlay({
     activeId,
     containerRef
 }: ScrollSpyDebugOverlayProps): React.ReactPortal | null {
-    const containerElRef = useRef<HTMLDivElement | null>(null);
+    const [portalContainer, setPortalContainer] = useState<HTMLDivElement | null>(null);
     const sectionRefsMap = useRef<Map<string, HTMLElement>>(new Map());
 
     useEffect(() => {
         const container = document.createElement('div');
         container.id = 'scrollspy-debug-root';
         document.body.appendChild(container);
-        containerElRef.current = container;
+        setPortalContainer(container);
 
         return () => {
             container.remove();
-            containerElRef.current = null;
+            setPortalContainer(null);
         };
     }, []);
 
@@ -87,7 +87,7 @@ export function ScrollSpyDebugOverlay({
         };
     }, [activeId]);
 
-    if (!containerElRef.current) {
+    if (!portalContainer) {
         return null;
     }
 
@@ -262,7 +262,7 @@ export function ScrollSpyDebugOverlay({
         </>
     );
 
-    return createPortal(content, containerElRef.current);
+    return createPortal(content, portalContainer);
 }
 
 export default ScrollSpyDebugOverlay;

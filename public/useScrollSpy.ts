@@ -3,7 +3,8 @@ import {
     useState,
     useEffect,
     useCallback,
-    useLayoutEffect
+    useLayoutEffect,
+    useMemo
 } from 'react';
 import type { RefObject } from 'react';
 
@@ -124,7 +125,10 @@ export function useScrollSpy(
 ): UseScrollSpyReturn | UseScrollSpyReturnWithDebug {
     const { offset = 'auto', offsetRatio = 0.08, debounceMs = 10, debug = false } = options;
 
-    const [activeId, setActiveId] = useState<string | null>(sectionIds[0] || null);
+    const sectionIdsKey = sectionIds.join(',');
+    const stableSectionIds = useMemo(() => sectionIds, [sectionIdsKey]);
+
+    const [activeId, setActiveId] = useState<string | null>(stableSectionIds[0] || null);
     const [debugInfo, setDebugInfo] = useState<DebugInfo>({
         scrollY: 0,
         triggerLine: 0,
@@ -141,13 +145,17 @@ export function useScrollSpy(
     });
 
     const refs = useRef<Record<string, HTMLElement | null>>({});
-    const activeIdRef = useRef<string | null>(sectionIds[0] || null);
+    const activeIdRef = useRef<string | null>(stableSectionIds[0] || null);
     const lastScrollY = useRef<number>(0);
     const lastActiveScore = useRef<number>(0);
     const rafId = useRef<number | null>(null);
     const isThrottled = useRef<boolean>(false);
     const throttleTimeoutId = useRef<ReturnType<typeof setTimeout> | null>(null);
     const hasPendingScroll = useRef<boolean>(false);
+    const debugRef = useRef<boolean>(debug);
+    const debugInfoRef = useRef<DebugInfo>(debugInfo);
+
+    debugRef.current = debug;
 
     const getEffectiveOffset = useCallback((): number => {
         if (offset === 'auto') {
@@ -234,7 +242,7 @@ export function useScrollSpy(
         const scrollTop = container ? container.scrollTop : window.scrollY;
         const containerTop = container ? container.getBoundingClientRect().top : 0;
 
-        return sectionIds
+        return stableSectionIds
             .map((id) => {
                 const el = refs.current[id];
                 if (!el) return null;
@@ -250,7 +258,7 @@ export function useScrollSpy(
                 };
             })
             .filter((bounds): bounds is SectionBounds => bounds !== null);
-    }, [sectionIds, containerRef]);
+    }, [stableSectionIds, containerRef]);
 
     const calculateActiveSection = useCallback(() => {
         const container = containerRef?.current;
@@ -286,39 +294,56 @@ export function useScrollSpy(
                 };
             });
 
+        const updateDebugInfo = (info: DebugInfo): void => {
+            if (debugRef.current) {
+                const current = debugInfoRef.current;
+                const hasChanged =
+                    current.scrollY !== info.scrollY ||
+                    current.triggerLine !== info.triggerLine ||
+                    current.offsetEffective !== info.offsetEffective ||
+                    current.sections.length !== info.sections.length ||
+                    current.sections.some((s, i) =>
+                        s.id !== info.sections[i]?.id ||
+                        s.isActive !== info.sections[i]?.isActive ||
+                        s.score !== info.sections[i]?.score
+                    );
+
+                if (hasChanged) {
+                    debugInfoRef.current = info;
+                    setDebugInfo(info);
+                }
+            }
+        };
+
         const isAtBottom = scrollY + viewportHeight >= scrollHeight - 5;
-        if (isAtBottom && sectionIds.length > 0) {
-            const lastId = sectionIds[sectionIds.length - 1];
+        if (isAtBottom && stableSectionIds.length > 0) {
+            const lastId = stableSectionIds[stableSectionIds.length - 1];
             activeIdRef.current = lastId;
             setActiveId((prev) => (prev !== lastId ? lastId : prev));
-            if (debug) {
-                setDebugInfo({
-                    scrollY,
-                    triggerLine,
-                    viewportHeight,
-                    offsetBase: baseOffset,
-                    offsetEffective: effectiveOffset,
-                    sections: buildDebugSections(lastId)
-                });
-            }
+            updateDebugInfo({
+                scrollY,
+                triggerLine,
+                viewportHeight,
+                offsetBase: baseOffset,
+                offsetEffective: effectiveOffset,
+                sections: buildDebugSections(lastId)
+            });
             return;
         }
 
         const isAtTop = scrollY <= 5;
-        if (isAtTop && sectionIds.length > 0) {
-            const firstId = sectionIds[0];
+        if (isAtTop && stableSectionIds.length > 0) {
+            const firstId = stableSectionIds[0];
             activeIdRef.current = firstId;
             setActiveId((prev) => (prev !== firstId ? firstId : prev));
-            if (debug) {
-                setDebugInfo({
-                    scrollY,
-                    triggerLine,
-                    viewportHeight,
-                    offsetBase: baseOffset,
-                    offsetEffective: effectiveOffset,
-                    sections: buildDebugSections(firstId)
-                });
-            }
+            updateDebugInfo({
+                scrollY,
+                triggerLine,
+                viewportHeight,
+                offsetBase: baseOffset,
+                offsetEffective: effectiveOffset,
+                sections: buildDebugSections(firstId)
+            });
             return;
         }
 
@@ -338,7 +363,7 @@ export function useScrollSpy(
                 score += visibleInViewportRatio * 800;
             }
 
-            const sectionIndex = sectionIds.indexOf(section.id);
+            const sectionIndex = stableSectionIds.indexOf(section.id);
             if (scrollDirection === 'down' && isInViewport && section.top <= triggerLine && section.bottom > triggerLine) {
                 score += 200;
             } else if (scrollDirection === 'up' && isInViewport && section.top <= triggerLine && section.bottom > triggerLine) {
@@ -384,23 +409,21 @@ export function useScrollSpy(
             }
         }
 
-        if (debug) {
-            setDebugInfo({
-                scrollY,
-                triggerLine,
-                viewportHeight,
-                offsetBase: baseOffset,
-                offsetEffective: effectiveOffset,
-                sections: scores.map((s) => ({
-                    id: s.id,
-                    score: Math.round(s.score),
-                    isActive: s.id === newActiveId,
-                    bounds: s.bounds,
-                    visibilityRatio: Math.round(s.visibilityRatio * 100) / 100
-                }))
-            });
-        }
-    }, [sectionIds, getEffectiveOffset, offsetRatio, getSectionBounds, debug, containerRef]);
+        updateDebugInfo({
+            scrollY,
+            triggerLine,
+            viewportHeight,
+            offsetBase: baseOffset,
+            offsetEffective: effectiveOffset,
+            sections: scores.map((s) => ({
+                id: s.id,
+                score: Math.round(s.score),
+                isActive: s.id === newActiveId,
+                bounds: s.bounds,
+                visibilityRatio: Math.round(s.visibilityRatio * 100) / 100
+            }))
+        });
+    }, [stableSectionIds, getEffectiveOffset, offsetRatio, getSectionBounds, containerRef]);
 
     useEffect(() => {
         const container = containerRef?.current;
@@ -449,10 +472,15 @@ export function useScrollSpy(
 
         calculateActiveSection();
 
+        const deferredRecalcId = setTimeout(() => {
+            calculateActiveSection();
+        }, 0);
+
         scrollTarget.addEventListener('scroll', handleScroll, { passive: true });
         window.addEventListener('resize', handleResize, { passive: true });
 
         return () => {
+            clearTimeout(deferredRecalcId);
             scrollTarget.removeEventListener('scroll', handleScroll);
             window.removeEventListener('resize', handleResize);
             if (rafId.current) {

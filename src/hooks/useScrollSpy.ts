@@ -473,10 +473,15 @@ export function useScrollSpy(
 
         calculateActiveSection();
 
+        const deferredRecalcId = setTimeout(() => {
+            calculateActiveSection();
+        }, 0);
+
         scrollTarget.addEventListener('scroll', handleScroll, { passive: true });
         window.addEventListener('resize', handleResize, { passive: true });
 
         return () => {
+            clearTimeout(deferredRecalcId);
             scrollTarget.removeEventListener('scroll', handleScroll);
             window.removeEventListener('resize', handleResize);
             if (rafId.current) {
@@ -491,17 +496,6 @@ export function useScrollSpy(
             hasPendingScroll.current = false;
         };
     }, [calculateActiveSection, debounceMs, containerRef]);
-
-    // Recalculate when debug mode is enabled to show overlay immediately
-    useEffect(() => {
-        if (debug && debugRef.current) {
-            // Small delay to ensure DOM is ready
-            const timeoutId = setTimeout(() => {
-                calculateActiveSection();
-            }, 0);
-            return () => clearTimeout(timeoutId);
-        }
-    }, [debug, calculateActiveSection]);
 
     if (debug) {
         return {
