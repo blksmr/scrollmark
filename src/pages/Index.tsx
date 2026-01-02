@@ -133,7 +133,7 @@ const API_RETURNS = [
 ];
 
 const LINKS = [
-  { label: "GitHub", href: "https://github.com/blksmr/paradice" },
+  { label: "GitHub", href: "https://github.com/blksmr/scrollmark" },
   { label: "Copy Hook", href: "#getting-started" },
   { label: "Examples", href: "#" },
 ];
@@ -245,12 +245,12 @@ const Index = () => {
         
         {/* Header */}
         <header className="mb-12">
-          <div className="text-2xl mb-4">🎲</div>
+          <div className="text-2xl mb-4">📍</div>
           <h1 className="text-foreground text-xl font-medium mb-2">
-            Welcome to paradice
+            scrollmark
           </h1>
           <p className="text-[#9d9d9d] text-sm">
-            Roll with the best scroll spy for React.
+            The scroll spy hook for React.
           </p>
         </header>
 
@@ -288,7 +288,7 @@ const Index = () => {
           className="mb-10"
         >
           <p className="text-[#7c7c7c] leading-relaxed">
-            <span className="text-foreground font-medium">paradice</span> is a 
+            <span className="text-foreground font-medium">scrollmark</span> is a 
             ready-to-use React hook that tracks which section of your page is currently 
             visible. Just copy the hook into your project—no installation needed. Perfect 
             for documentation sites, landing pages, and anywhere you need a table of contents 
@@ -567,7 +567,7 @@ const Index = () => {
 
         {/* Copyright */}
         <div className="text-[#9d9d9d] text-xs">
-          <p>© 2026 paradice</p>
+          <p>© 2026 scrollmark</p>
           <p className="mt-1">
             Made with ☕ by{" "}
             <a href="https://x.com/blkasmir" className="link-hover">

@@ -1,27 +1,23 @@
-# paradice 🎲
+# scrollmark 🎲
 
-A ready-to-use React scroll spy hook with automatic overlay detection. Just copy the hook into your project and use it!
+A lightweight, ready-to-use React hook for scroll spying with automatic overlay detection.
 
-## Features
+## Technologies
 
-- 🎯 **Auto Overlay Detection** - Automatically detects sticky/fixed headers
-- ⚡ **Buttery Smooth** - RAF + throttling for 60fps performance
-- 🧠 **Hysteresis Scoring** - Smart algorithm prevents jittery switching
-- 🪟 **Window & Container** - Works with both window scroll and custom containers
-- 🐛 **Debug Mode** - Visual overlay showing scroll position and section scores
-- 📘 **TypeScript Ready** - Full type definitions included
-- 🎁 **Zero Dependencies** - Just React
+- Vite
+- TypeScript
+- React
+- Tailwind CSS
 
-## Quick Start
+## Usage
 
-1. Copy `src/hooks/useScrollSpy.tsx` into your project
-2. Use it in your components:
+Simply copy the `src/hooks/useScrollSpy.ts` file into your project. That's it! No installation needed.
 
 ```tsx
 import { useScrollSpy } from './hooks/useScrollSpy';
 
-function MyComponent() {
-  const { activeId, registerRef, scrollToSection } = useScrollSpy([
+function TableOfContents() {
+  const { activeId, registerRef } = useScrollSpy([
     'intro',
     'features',
     'api'
@@ -30,34 +26,43 @@ function MyComponent() {
   return (
     <>
       <nav>
-        <button onClick={() => scrollToSection('intro')}>Intro</button>
-        <button onClick={() => scrollToSection('features')}>Features</button>
+        {/* Navigation links */}
       </nav>
-      
       <section id="intro" ref={registerRef('intro')}>
-        Intro content
+        {/* Intro content */}
       </section>
-      
-      <section id="features" ref={registerRef('features')}>
-        Features content
-      </section>
+      {/* Other sections */}
     </>
   );
 }
 ```
 
-## Development
+## Testing
 
-```sh
-git clone <YOUR_GIT_URL>
-cd paradice
-npm i
-npm run dev
+Run tests with:
+
+```bash
+npm test
+```
+
+Run tests with UI:
+
+```bash
+npm run test:ui
+```
+
+Run tests with coverage:
+
+```bash
+npm run test:coverage
 ```
 
 ## Scripts
 
 - `npm run dev` - Development server
 - `npm run build` - Production build
-- `npm run preview` - Preview build
+- `npm run preview` - Preview production build
 - `npm run lint` - ESLint check
+- `npm test` - Run tests
+- `npm run test:ui` - Run tests with UI
+- `npm run test:coverage` - Run tests with coverage

@@ -1,5 +1,5 @@
 {
-  "name": "paradice",
+  "name": "scrollmark",
   "private": true,
   "version": "1.0.0",
   "description": "A ready-to-use React scroll spy hook with automatic overlay detection",
@@ -9,7 +9,10 @@
     "build": "vite build",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest --coverage"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
