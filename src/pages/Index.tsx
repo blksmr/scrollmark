@@ -1,5 +1,6 @@
-import { useState, useEffect, useRef, useLayoutEffect } from "react";
+import { useState, useRef, useLayoutEffect } from "react";
 import { useScrollSpy } from "@/hooks/useScrollSpy";
+import { ScrollSpyDebugOverlay } from "@/hooks/ScrollSpyDebugOverlay";
 import { ArrowUpRight, Copy, Check } from "lucide-react";
 import {
   Dialog,
@@ -95,7 +96,7 @@ const loadHookSource = async (): Promise<string> => {
   if (HOOK_SOURCE_CODE_CACHE) return HOOK_SOURCE_CODE_CACHE;
   
   try {
-    const response = await fetch('/useScrollSpy.tsx');
+    const response = await fetch('/useScrollSpy.ts');
     const text = await response.text();
     HOOK_SOURCE_CODE_CACHE = text;
     return text;
@@ -129,12 +130,12 @@ const Index = () => {
     }
   };
   
-  // offset: 'auto' (default) automatically detects fixed/sticky elements at top
-  // Disable debug mode when modal is open
-  const { activeId, registerRef, scrollToSection } = useScrollSpy(
+  const showDebug = debugMode && !isModalOpen;
+
+  const { activeId, registerRef, scrollToSection, debugInfo } = useScrollSpy(
     SECTIONS.map((s) => s.id),
     null,
-    { debug: debugMode && !isModalOpen }
+    { debug: true }
   );
 
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, sectionId: string) => {
@@ -338,7 +339,7 @@ const Index = () => {
               <DialogContent className="max-w-5xl h-[90vh] gap-1 flex flex-col p-0">
                 <DialogHeader className="space-y-0 px-6 pt-6 pb-4 border-b border-border flex-shrink-0 flex flex-row items-center justify-between">
                   <div>
-                    <DialogTitle className="text-lg">useScrollSpy.tsx</DialogTitle>
+                    <DialogTitle className="text-lg">useScrollSpy.ts</DialogTitle>
                     <DialogDescription className="text-sm text-[#7c7c7c]">
                       Copy this hook into your project's hooks folder
                     </DialogDescription>
@@ -390,7 +391,7 @@ const Index = () => {
           
           <pre className="code-block mb-6">
             <code>
-              <span className="text-[#6b7280]"># Copy src/hooks/useScrollSpy.tsx to your project</span>{"\n"}
+              <span className="text-[#6b7280]"># Copy src/hooks/useScrollSpy.ts to your project</span>{"\n"}
               <span className="text-[#6b7280]"># That's it! No installation needed.</span>
             </code>
           </pre>
@@ -496,6 +497,13 @@ const Index = () => {
           </p>
         </div>
       </main>
+
+      {showDebug && (
+        <ScrollSpyDebugOverlay
+          debugInfo={debugInfo}
+          activeId={activeId}
+        />
+      )}
     </div>
   );
 };
