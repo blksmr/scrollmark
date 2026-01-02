@@ -1,4 +1,4 @@
-import { useState, useRef, useLayoutEffect } from "react";
+import { useState, useRef, useLayoutEffect, useEffect } from "react";
 import { useScrollSpy } from "@/hooks/useScrollSpy";
 import { ScrollSpyDebugOverlay } from "@/hooks/ScrollSpyDebugOverlay";
 import { ArrowUpRight, Copy, Check } from "lucide-react";
@@ -142,6 +142,20 @@ const Index = () => {
     e.preventDefault();
     scrollToSection(sectionId);
   };
+
+  // Force recalculation when debug mode is enabled
+  useEffect(() => {
+    if (showDebug && debugInfo.sections.length === 0) {
+      // Small delay to ensure sections are registered, then trigger scroll event
+      const timeoutId = setTimeout(() => {
+        // Trigger a resize event to force recalculation
+        window.dispatchEvent(new Event('resize'));
+        // Also trigger scroll to ensure calculateActiveSection is called
+        window.dispatchEvent(new Event('scroll'));
+      }, 100);
+      return () => clearTimeout(timeoutId);
+    }
+  }, [showDebug, debugInfo.sections.length]);
 
   // Highlight code when hookSourceCode changes or modal opens
   useLayoutEffect(() => {

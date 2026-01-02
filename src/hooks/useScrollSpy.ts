@@ -242,7 +242,7 @@ export function useScrollSpy(
         const scrollTop = container ? container.scrollTop : window.scrollY;
         const containerTop = container ? container.getBoundingClientRect().top : 0;
 
-        return sectionIds
+        return stableSectionIds
             .map((id) => {
                 const el = refs.current[id];
                 if (!el) return null;
@@ -258,7 +258,7 @@ export function useScrollSpy(
                 };
             })
             .filter((bounds): bounds is SectionBounds => bounds !== null);
-    }, [sectionIds, containerRef]);
+    }, [stableSectionIds, containerRef]);
 
     const calculateActiveSection = useCallback(() => {
         const container = containerRef?.current;
@@ -317,8 +317,8 @@ export function useScrollSpy(
         };
 
         const isAtBottom = scrollY + viewportHeight >= scrollHeight - 5;
-        if (isAtBottom && sectionIds.length > 0) {
-            const lastId = sectionIds[sectionIds.length - 1];
+        if (isAtBottom && stableSectionIds.length > 0) {
+            const lastId = stableSectionIds[stableSectionIds.length - 1];
             activeIdRef.current = lastId;
             setActiveId((prev) => (prev !== lastId ? lastId : prev));
             updateDebugInfo({
@@ -333,8 +333,8 @@ export function useScrollSpy(
         }
 
         const isAtTop = scrollY <= 5;
-        if (isAtTop && sectionIds.length > 0) {
-            const firstId = sectionIds[0];
+        if (isAtTop && stableSectionIds.length > 0) {
+            const firstId = stableSectionIds[0];
             activeIdRef.current = firstId;
             setActiveId((prev) => (prev !== firstId ? firstId : prev));
             updateDebugInfo({
@@ -364,7 +364,7 @@ export function useScrollSpy(
                 score += visibleInViewportRatio * 800;
             }
 
-            const sectionIndex = sectionIds.indexOf(section.id);
+            const sectionIndex = stableSectionIds.indexOf(section.id);
             if (scrollDirection === 'down' && isInViewport && section.top <= triggerLine && section.bottom > triggerLine) {
                 score += 200;
             } else if (scrollDirection === 'up' && isInViewport && section.top <= triggerLine && section.bottom > triggerLine) {
@@ -424,7 +424,7 @@ export function useScrollSpy(
                 visibilityRatio: Math.round(s.visibilityRatio * 100) / 100
             }))
         });
-    }, [sectionIds, getEffectiveOffset, offsetRatio, getSectionBounds, containerRef]);
+    }, [stableSectionIds, getEffectiveOffset, offsetRatio, getSectionBounds, containerRef]);
 
     useEffect(() => {
         const container = containerRef?.current;
@@ -491,6 +491,17 @@ export function useScrollSpy(
             hasPendingScroll.current = false;
         };
     }, [calculateActiveSection, debounceMs, containerRef]);
+
+    // Recalculate when debug mode is enabled to show overlay immediately
+    useEffect(() => {
+        if (debug && debugRef.current) {
+            // Small delay to ensure DOM is ready
+            const timeoutId = setTimeout(() => {
+                calculateActiveSection();
+            }, 0);
+            return () => clearTimeout(timeoutId);
+        }
+    }, [debug, calculateActiveSection]);
 
     if (debug) {
         return {
