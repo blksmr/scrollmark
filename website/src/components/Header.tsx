@@ -1,7 +1,9 @@
+import { Heading } from "@/components/Heading";
+
 export function Header() {
   return (
     <header className="flex w-full justify-between mb-6">
-      <h1 className="flex items-center gap-2">
+      <Heading as="h1" className="flex items-center gap-2 mb-0">
         <svg className="size-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
           <g fill="currentColor">
             <path
@@ -21,7 +23,7 @@ export function Header() {
           </g>
         </svg>
         Scrowl
-      </h1>
+      </Heading>
     </header>
   );
 }

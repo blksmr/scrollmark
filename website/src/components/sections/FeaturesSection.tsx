@@ -1,4 +1,5 @@
 import type { RefCallback } from "react";
+import { Heading } from "@/components/Heading";
 import { FEATURES } from "@/constants";
 
 type FeaturesSectionProps = {
@@ -10,7 +11,7 @@ type FeaturesSectionProps = {
 export function FeaturesSection({ registerRef, debugMode, onToggleDebug }: FeaturesSectionProps) {
   return (
     <section id="features" ref={registerRef} className="mb-12">
-      <h2 className="text-foreground font-medium mb-6">Features</h2>
+      <Heading>Features</Heading>
 
       <ul className="space-y-6">
         {FEATURES.map((feature) => (
@@ -25,7 +26,7 @@ export function FeaturesSection({ registerRef, debugMode, onToggleDebug }: Featu
                   {debugMode ? " ✓" : ""}
                 </button>
               ) : (
-                <h3 className="text-foreground font-medium">{feature.title}</h3>
+                <Heading as="h3" className="mb-0">{feature.title}</Heading>
               )}
               {feature.badge && (
                 <span className="badge">
