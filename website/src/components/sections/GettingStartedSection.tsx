@@ -1,22 +1,17 @@
-import type { RefCallback } from "react";
 import { CodeBlock } from "@/components/CodeBlock";
 import { Heading } from "@/components/Heading";
 import { INSTALL_CODE, USAGE_CODE } from "@/constants";
 
-type GettingStartedSectionProps = {
-  registerRef: RefCallback<HTMLElement>;
-};
-
-export function GettingStartedSection({ registerRef }: GettingStartedSectionProps) {
+export function GettingStartedSection() {
   return (
-    <section id="getting-started" ref={registerRef} className="mb-12">
+    <section id="getting-started">
       <Heading>Installation</Heading>
 
-      <CodeBlock code={INSTALL_CODE} lang="bash" className="mb-6" />
+      <CodeBlock code={INSTALL_CODE} lang="bash"/>
 
       <Heading>Usage</Heading>
 
-      <p className="leading-relaxed mb-4">
+      <p >
         It can be used anywhere in your application as follows.
       </p>
 

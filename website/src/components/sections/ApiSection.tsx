@@ -1,19 +1,15 @@
-import { useState, type RefCallback } from "react";
+import { useState } from "react";
 import { Heading } from "@/components/Heading";
 import { API_ARGUMENTS, API_OPTIONS, API_RETURNS } from "@/constants";
-
-type ApiSectionProps = {
-  registerRef: RefCallback<HTMLElement>;
-};
 
 const TABS = ["Arguments", "Options", "Returns"] as const;
 type Tab = (typeof TABS)[number];
 
-export function ApiSection({ registerRef }: ApiSectionProps) {
+export function ApiSection() {
   const [activeTab, setActiveTab] = useState<Tab>("Arguments");
 
   return (
-    <section id="api" ref={registerRef} className="mb-12">
+    <section id="api">
       <Heading>API</Heading>
 
       <div className="flex w-fit gap-1 mb-6 border-b border-border">
@@ -40,7 +36,7 @@ export function ApiSection({ registerRef }: ApiSectionProps) {
                 <kbd>{item.name}</kbd>
                 <kbd>{item.type}</kbd>
               </div>
-              <p className="leading-relaxed">{item.description}</p>
+              <p >{item.description}</p>
             </li>
           ))}
         </ul>
@@ -55,7 +51,7 @@ export function ApiSection({ registerRef }: ApiSectionProps) {
                 <kbd>{item.type}</kbd> =
                 <kbd>{item.default}</kbd>
               </div>
-              <p className="leading-relaxed">{item.description}</p>
+              <p >{item.description}</p>
             </li>
           ))}
         </ul>
@@ -69,7 +65,7 @@ export function ApiSection({ registerRef }: ApiSectionProps) {
                 <kbd>{item.name}</kbd>
                 <kbd>{item.type}</kbd>
               </div>
-              <p className="leading-relaxed">{item.description}</p>
+              <p >{item.description}</p>
             </li>
           ))}
         </ul>

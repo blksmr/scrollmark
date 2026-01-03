@@ -1,17 +1,11 @@
-import type { RefCallback } from "react";
-
-type IntroSectionProps = {
-  registerRef: RefCallback<HTMLElement>;
-};
-
-export function IntroSection({ registerRef }: IntroSectionProps) {
+export function IntroSection() {
   return (
-    <section id="intro" ref={registerRef} className="mb-12">
-      <p className="leading-relaxed mb-4">
+    <section id="intro">
+      <p >
         Scrowl is a lightweight scroll spy hook for React. Track which section is in view, highlight nav
         items, and build smooth scrolling experiences.
       </p>
-      <p className="leading-relaxed">
+      <p >
         Uses <kbd>requestAnimationFrame</kbd> with throttling for 60fps performance. Hysteresis prevents
         jittery switching near section boundaries.
       </p>

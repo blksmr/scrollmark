@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { getHighlighter, type Highlighter } from "shiki";
 
 interface CodeBlockProps {
@@ -20,36 +20,34 @@ const getShikiHighlighter = () => {
 };
 
 export const CodeBlock = ({ code, lang = "typescript", className = "" }: CodeBlockProps) => {
-  const [html, setHtml] = useState<string>("");
-  const mounted = useRef(true);
+  const preRef = useRef<HTMLPreElement>(null);
 
   useEffect(() => {
-    mounted.current = true;
+    let cancelled = false;
+
+    if (preRef.current) {
+      preRef.current.textContent = code;
+    }
+
     getShikiHighlighter().then((highlighter) => {
-      if (!mounted.current) return;
+      if (cancelled || !preRef.current) return;
       const result = highlighter.codeToHtml(code, {
         lang,
         theme: "github-light",
       });
-      setHtml(result);
+      const temp = document.createElement("div");
+      temp.innerHTML = result;
+      const pre = temp.querySelector("pre");
+      if (pre && preRef.current) {
+        preRef.current.innerHTML = pre.innerHTML;
+        preRef.current.style.cssText = pre.style.cssText;
+      }
     });
+
     return () => {
-      mounted.current = false;
+      cancelled = true;
     };
   }, [code, lang]);
 
-  if (!html) {
-    return (
-      <pre className={`code-block ${className}`}>
-        <code>{code}</code>
-      </pre>
-    );
-  }
-
-  return (
-    <div
-      className={className}
-      dangerouslySetInnerHTML={{ __html: html }}
-    />
-  );
+  return <pre ref={preRef} className={`shiki ${className}`.trim()} />;
 };

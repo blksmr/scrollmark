@@ -8,7 +8,7 @@ type HeadingProps = {
 
 export function Heading({ as: Tag = "h2", children, className = "" }: HeadingProps) {
   return (
-    <Tag className={`text-foreground font-medium mb-4 ${className}`.trim()}>
+    <Tag className={`text-foreground mt-6 ${className}`.trim()}>
       {children}
     </Tag>
   );

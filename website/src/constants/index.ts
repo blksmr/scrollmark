@@ -115,23 +115,28 @@ export const INSTALL_CODE = `npm install scrowl`;
 
 export const USAGE_CODE = `import { useScrowl } from 'scrowl'
 
-function TableOfContents() {
-  const { activeId, registerRef, scrollToSection } = useScrowl([
-    'intro',
-    'features',
-    'api'
-  ])
+const sections = ['intro', 'features', 'api']
+
+function Page() {
+  const { activeId, registerRef } = useScrowl(sections)
 
   return (
     <>
       <nav>
-        <button onClick={() => scrollToSection('intro')}>Intro</button>
-        <button onClick={() => scrollToSection('features')}>Features</button>
+        {sections.map(id => (
+          <a
+            key={id}
+            href={\`#\${id}\`}
+            className={activeId === id ? 'active' : ''}
+          >
+            {id}
+          </a>
+        ))}
       </nav>
 
-      <section id="intro" ref={registerRef('intro')}>
-        ...
-      </section>
+      <section id="intro" ref={registerRef('intro')}>...</section>
+      <section id="features" ref={registerRef('features')}>...</section>
+      <section id="api" ref={registerRef('api')}>...</section>
     </>
   )
 }`;
