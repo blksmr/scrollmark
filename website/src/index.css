@@ -2,6 +2,8 @@
 @import '@fontsource/inter/500.css';
 @import '@fontsource/inter/600.css';
 @import '@fontsource/inter/700.css';
+@import '@fontsource/roboto-mono/400.css';
+@import '@fontsource/roboto-mono/500.css';
 
 @tailwind base;
 @tailwind components;
@@ -10,6 +12,7 @@
 @layer base {
   :root {
     --background: #fff;
+    --background-secondary: oklch(0.9821 0 0);
     --foreground: #040404;
     
     --muted: #fafaf9;
@@ -47,7 +50,7 @@
     --code-bg: #fafaf9;
     --code-border: rgba(0, 0, 0, 0.06);
     
-    --font-mono: 'Geist Mono', 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+    --font-mono: 'Roboto Mono', 'SF Mono', Monaco, 'Cascadia Code', Consolas, 'Courier New', monospace;
   }
 }
 
@@ -89,15 +92,10 @@
     transition: color .2s ease;
   }
   
-  .section-divider {
-    @apply border-t my-12;
-    border-color: rgba(0, 0, 0, 0.08);
-  }
-  
   .badge {
     @apply inline-flex px-2 py-0.5 rounded;
     background: rgba(0, 0, 0, 0.04);
-    font-family: 'Geist Mono', 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+    font-family: var(--font-mono);
     font-size: 13px;
     color: #040404;
   }
@@ -148,17 +146,11 @@
   }
 }
 
-.demo {
-  position: relative;
-  display: flex;
-  width: 100%;
-  height: 384px;
-  padding: 24px;
-  overflow: hidden;
-  background: var(--background);
-  border: 1px solid var(--border);
-  @apply mb-6;
-  border-radius: 8px;
+kbd {
+  @apply px-1.5 text-xs rounded-md border;
+  font-family: var(--font-mono);
+  background-color: var(--background-secondary);
+  border-color: var(--border);
 }
 
 /* Custom scrollbar - minimal */
