@@ -35,12 +35,7 @@ export const FEATURES = [
     title: "TypeScript Ready",
     description: "Full type definitions included. Autocomplete everything.",
     badge: null,
-  },
-  {
-    title: "Copy & Use",
-    description: "No installation, no bundling. Just copy the hook file into your project and use it.",
-    badge: null,
-  },
+  }
 ];
 
 export const API_ARGUMENTS = [

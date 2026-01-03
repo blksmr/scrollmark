@@ -1,36 +1,23 @@
-import type { RefCallback } from "react";
 import { Heading } from "@/components/Heading";
 import { FEATURES } from "@/constants";
 
-
 export function FeaturesSection() {
   return (
-    <section id="features" >
+    <section id="features">
       <Heading>Features</Heading>
 
-      <ul className="space-y-6">
+      <div className="grid grid-cols-2 gap-x-8 gap-y-4 mt-3">
         {FEATURES.map((feature) => (
-          <li key={feature.title}>
-            <div className="flex items-start gap-2 mb-1">
-              {feature.title === "Debug Mode" ? (
-                <button
-                  className="text-foreground font-medium hover:underline inline-flex items-center gap-1 transition-colors"
-                >
-                  {feature.title}
-                </button>
-              ) : (
-                <Heading as="h3" className="mb-0">{feature.title}</Heading>
-              )}
-              {feature.badge && (
-                <span className="badge">
-                  {feature.badge}
-                </span>
-              )}
-            </div>
-            <p >{feature.description}</p>
-          </li>
+          <div key={feature.title} className="flex items-baseline gap-2">
+            <span className="text-foreground">{feature.title}</span>
+            {feature.badge && (
+              <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                {feature.badge}
+              </span>
+            )}
+          </div>
         ))}
-      </ul>
+      </div>
     </section>
   );
 }
