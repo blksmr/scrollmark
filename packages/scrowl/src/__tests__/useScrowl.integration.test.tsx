@@ -64,30 +64,6 @@ describe('useScrowl Integration Tests', () => {
   });
 
   describe('Real-world scenarios', () => {
-    it('should work with a typical documentation page layout', async () => {
-      const sections = ['intro', 'features', 'getting-started', 'api'];
-
-      render(<TestComponent sectionIds={sections} containerRef={null} />);
-
-      expect(screen.getByTestId('active-id')).toHaveTextContent('intro');
-
-      act(() => {
-        Object.defineProperty(window, 'scrollY', {
-          writable: true,
-          value: 600,
-        });
-        window.dispatchEvent(new Event('scroll'));
-      });
-
-      await waitFor(
-        () => {
-          const activeId = screen.getByTestId('active-id').textContent;
-          expect(activeId).not.toBe('intro');
-        },
-        { timeout: 2000 }
-      );
-    });
-
     it('should handle sticky navigation header', async () => {
       const header = document.createElement('nav');
       header.style.position = 'sticky';

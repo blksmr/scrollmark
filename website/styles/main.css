@@ -7,38 +7,14 @@
     --background: #fff;
     --background-secondary: oklch(0.9821 0 0);
     --foreground: #040404;
-
+    --primary: oklch(0.22213 0 0);
     --muted: #fafaf9;
     --muted-foreground: rgba(4, 4, 4, 0.6);
-
-    --card: #ffffff;
-    --card-foreground: #040404;
-
-    --popover: #ffffff;
-    --popover-foreground: #040404;
 
     --secondary: #fafaf9;
     --secondary-foreground: #040404;
     --secondary-foreground-hover: oklch(0.30557 0 0);
-
-    --accent: 270 50% 55%;
-    --accent-foreground: #040404;
-
-    --destructive: 0 62.8% 50%;
-    --destructive-foreground: #040404;
-
     --border: oklch(0 0 0/5%);
-    --input: rgba(0, 0, 0, 0.08);
-    --ring: rgba(0, 0, 0, 0.1);
-
-    --radius: 0.5rem;
-
-    --nav-active: #040404;
-    --nav-hover: rgba(0, 0, 0, 0.04);
-    --progress-bg: rgba(0, 0, 0, 0.04);
-
-    --code-bg: #fafaf9;
-    --code-border: rgba(0, 0, 0, 0.06);
 
     --font-mono: var(--font-mono), 'Roboto Mono', 'SF Mono', Monaco, 'Cascadia Code', Consolas, 'Courier New', monospace;
   }
@@ -86,12 +62,8 @@
     @apply mt-3 leading-6;
   }
 
-   h1 {
-    @apply text-base font-medium mt-8 mb-3;
-  }
-
-   h2 {
-    @apply text-base font-medium mt-8 mb-3;
+   h1,h2,h3,h4,h5,h6 {
+    @apply font-medium;
   }
 
    a {
@@ -135,16 +107,26 @@
   }
 
 }
+
+p + p,
+h1 + p,
+h2 + p,
+.shiki + p,
+h1 + .shiki,
+p + .shiki,
+h1 + h2 {
+  @apply mt-3;
+}
+
+
 article {
-  & 
-  p + p,
-  h1 + p,
-  h2 + p,
-  .shiki + p,
-  h1 + .shiki,
-  p + .shiki,
-  h1 + h2 {
-    @apply mt-3;
+  & h1,
+  & h2,
+  & h3,
+  & h4,
+  & h5,
+  & h6 {
+    @apply mt-6;
   }
 }
 
@@ -202,24 +184,14 @@ article {
   }
 }
 
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.2);
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 0, 0, 0.3);
-}
-
-::selection {
-  background: rgba(0, 0, 0, 0.1);
+iframe {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 400px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  isolation: isolate;
 }

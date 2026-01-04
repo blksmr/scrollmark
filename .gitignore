@@ -11,7 +11,9 @@ node_modules
 dist
 dist-ssr
 *.local
-
+test-results
+__tests__
+playwright-*
 # Next.js
 .next
 out

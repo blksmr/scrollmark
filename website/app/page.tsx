@@ -2,6 +2,7 @@ import Documentation from "@/content/documentation.mdx";
 import { getMDXComponents } from "@/mdx-components";
 import { getHomePage } from "@/lib/fumadocs";
 import { Logo } from "@/components/Logo";
+import scrowlPackage from "../../packages/scrowl/package.json";
 
 export default function Page() {
   const page = getHomePage();
@@ -14,11 +15,12 @@ export default function Page() {
   const MDX = page.data.body;
   return (
     <article className="md:max-w-[640px] w-[80%] mx-auto py-32">
-      <header className="flex w-full justify-between mb-6">
-        <h1 className="flex items-center gap-2 text-base font-medium">
+      <header className="flex w-full justify-between mb-6 items-center">
+        <h1 className="flex gap-2 items-center">
           <Logo />
           Scrowl
         </h1>
+        <span className="font-mono text-xs text-gray-500">v{scrowlPackage.version}</span>
       </header>
       <MDX components={getMDXComponents()} />
     </article>

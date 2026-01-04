@@ -152,6 +152,8 @@ export function useScrowl(
     const isThrottled = useRef<boolean>(false);
     const throttleTimeoutId = useRef<ReturnType<typeof setTimeout> | null>(null);
     const hasPendingScroll = useRef<boolean>(false);
+    const isProgrammaticScrolling = useRef<boolean>(false);
+    const programmaticScrollTimeoutId = useRef<ReturnType<typeof setTimeout> | null>(null);
     const debugRef = useRef<boolean>(debug);
     const debugInfoRef = useRef<DebugInfo>(debugInfo);
 
@@ -210,6 +212,14 @@ export function useScrowl(
         const element = refs.current[id];
         if (!element) return;
 
+        if (programmaticScrollTimeoutId.current) {
+            clearTimeout(programmaticScrollTimeoutId.current);
+        }
+
+        isProgrammaticScrolling.current = true;
+        activeIdRef.current = id;
+        setActiveId(id);
+
         const container = containerRef?.current;
         const elementRect = element.getBoundingClientRect();
         const effectiveOffset = getEffectiveOffset() + 10;
@@ -229,13 +239,12 @@ export function useScrowl(
             });
         }
 
-        activeIdRef.current = id;
-        setActiveId(id);
+        programmaticScrollTimeoutId.current = setTimeout(() => {
+            isProgrammaticScrolling.current = false;
+            programmaticScrollTimeoutId.current = null;
+        }, 600);
     }, [containerRef, getEffectiveOffset]);
 
-    useEffect(() => {
-        activeIdRef.current = activeId;
-    }, [activeId]);
 
     const getSectionBounds = useCallback((): SectionBounds[] => {
         const container = containerRef?.current;
@@ -261,6 +270,8 @@ export function useScrowl(
     }, [stableSectionIds, containerRef]);
 
     const calculateActiveSection = useCallback(() => {
+        if (isProgrammaticScrolling.current) return;
+
         const container = containerRef?.current;
         const currentActiveId = activeIdRef.current;
         const scrollY = container ? container.scrollTop : window.scrollY;
@@ -492,8 +503,13 @@ export function useScrowl(
                 clearTimeout(throttleTimeoutId.current);
                 throttleTimeoutId.current = null;
             }
+            if (programmaticScrollTimeoutId.current) {
+                clearTimeout(programmaticScrollTimeoutId.current);
+                programmaticScrollTimeoutId.current = null;
+            }
             isThrottled.current = false;
             hasPendingScroll.current = false;
+            isProgrammaticScrolling.current = false;
         };
     }, [calculateActiveSection, debounceMs, containerRef]);
 

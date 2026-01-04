@@ -11,9 +11,11 @@
   ],
   "scripts": {
     "dev": "turbo run dev",
-    "build": "turbo run build",
-    "build:dev": "turbo run build:dev",
     "lint": "turbo run lint",
+    "build": "turbo run build",
+    "start": "cd website && npm run start",
+    "build:dev": "turbo run build:dev",
+    "documentation": "npx tsx scripts/documentation.ts",
     "test": "turbo run test"
   },
   "devDependencies": {

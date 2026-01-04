@@ -1,6 +1,6 @@
 {
   "name": "scrowl",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "A React hook for scroll tracking with smooth 60fps performance and smart hysteresis",
   "type": "module",
   "main": "./dist/index.js",
@@ -19,22 +19,28 @@
     "build": "tsc",
     "dev": "tsc --watch",
     "lint": "eslint src",
-    "test": "vitest"
+    "test": "vitest",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui"
   },
   "peerDependencies": {
     "react": "^18.0.0",
     "react-dom": "^18.0.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.57.0",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.1.0",
     "@testing-library/user-event": "^14.5.2",
     "@types/react": "^18.3.23",
     "@types/react-dom": "^18.3.7",
+    "@vitejs/plugin-react": "^5.1.2",
     "@vitest/coverage-v8": "^2.1.8",
     "jsdom": "^25.0.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
     "typescript": "^5.8.3",
+    "vite": "^5.4.21",
     "vitest": "^2.1.8"
   }
 }
-
