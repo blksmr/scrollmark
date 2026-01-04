@@ -18,9 +18,9 @@ const sourceFile = path.join(__dirname, "../website/content/documentation.mdx");
 const targetFiles: Record<string, string> = {
   "README.md": path.join(__dirname, "../README.md"),
   "website/public/llms.txt": path.join(__dirname, "../website/public/llms.txt"),
-  "packages/cambio/README.md": path.join(
+  "packages/scrowl/README.md": path.join(
     __dirname,
-    "../packages/cambio/README.md",
+    "../packages/scrowl/README.md",
   ),
 };
 
@@ -47,12 +47,12 @@ function extractFrontmatter(content: string): {
 
 function transformContent(content: string): string {
   const { frontmatter, content: bodyContent } = extractFrontmatter(content);
-  const title = frontmatter.title || "Cambio";
+  const title = frontmatter.title || "Scrowl";
 
   let transformed = `# ${title}\n\n${bodyContent}`;
 
   transformed = transformed.replace(
-    /<center[^>]*>\s*[\s\S]*?\s*<\/center>(\s*\n)*/g,
+    /<Iframe[^>]*\/>(\s*\n)*/g,
     "",
   );
   transformed = transformed.replace(/\n{3,}/g, "\n\n");

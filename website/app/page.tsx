@@ -20,7 +20,7 @@ export default function Page() {
           <Logo />
           Scrowl
         </h1>
-        <span className="font-mono text-xs text-gray-500">v{scrowlPackage.version}</span>
+        <span className="font-mono text-[10px] text-gray-500">v{scrowlPackage.version}</span>
       </header>
       <MDX components={getMDXComponents()} />
     </article>
