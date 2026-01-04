@@ -12,7 +12,7 @@ export const APP_URL = () => {
 
 export const APP_NAME = "Scrowl";
 export const APP_DESCRIPTION = "A lightweight scroll spy hook for React";
-export const APP_OG_ENDPOINT = "/api/og";
+export const APP_OG_ENDPOINT = `${APP_URL()}/opengraph.png`;
 
 export const KEYWORDS = [
   "scroll spy",
