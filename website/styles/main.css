@@ -184,13 +184,5 @@ h1 + h2 {
 }
 
 iframe {
-  position: relative;
-  display: block;
-  width: 100%;
-  height: 470px;
-  overflow-y: auto;
-  overflow-x: hidden;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  isolation: isolate;
+  @apply relative block w-full aspect-[640/470] overflow-y-auto overflow-x-hidden border border-border rounded-lg isolate;
 }
