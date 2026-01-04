@@ -2,71 +2,59 @@
 
 import { useScrowl } from "scrowl";
 
-const SECTION_IDS = ["intro", "features", "usage", "api"] as const;
+const SECTIONS = [
+  { id: "desert", label: "Desert", color: "#5c4033" },
+  { id: "mountains", label: "Mountains", color: "#16213e" },
+  { id: "forest", label: "Forest", color: "#1b4332" },
+  { id: "coast", label: "Coast", color: "#0c4a6e" },
+] as const;
+
+const SECTION_IDS = SECTIONS.map((s) => s.id);
 
 export function Basic() {
-  const { activeId, registerRef, scrollToSection } = useScrowl([...SECTION_IDS], null, {
+  const { activeId, registerRef, scrollToSection } = useScrowl(SECTION_IDS, null, {
     offset: 0,
   });
 
   return (
-    <div className="flex min-h-screen">
-      <nav className="w-40 shrink-0 border-r border-neutral-100 p-4 sticky top-0 h-screen">
-        <ul className="space-y-1">
-          {SECTION_IDS.map((id) => (
-            <li key={id}>
-              <button
-                onClick={() => scrollToSection(id)}
-                className={`w-full text-left px-3 py-1.5 text-sm rounded-md transition-colors ${
-                  activeId === id
-                    ? "bg-neutral-900 text-white"
-                    : "text-neutral-500 hover:text-neutral-900"
-                }`}
-              >
-                {id.charAt(0).toUpperCase() + id.slice(1)}
-              </button>
-            </li>
-          ))}
-        </ul>
+    <div className="relative min-h-screen bg-white">
+      <nav className="fixed right-3 top-1/2 -translate-y-1/2 z-10 flex flex-col items-end gap-3">
+        {SECTIONS.map(({ id }) => (
+          <button
+            key={id}
+            onClick={() => scrollToSection(id)}
+            className="group flex items-center gap-3"
+          >
+            <span
+              className={`block h-0.5 rounded-full bg-black transition-all duration-300 ${
+                activeId === id ? "w-6 opacity-100" : "w-4 opacity-20 group-hover:opacity-70"
+              }`}
+            />
+          </button>
+        ))}
       </nav>
 
-      <main className="flex-1 p-6 space-y-12">
-        <section id="intro" ref={registerRef("intro")} className="min-h-[300px]">
-          <h2 className="text-xl font-bold mb-3">Introduction</h2>
-          <p className="text-neutral-600 text-sm">
-            Scrowl is a lightweight React hook for scroll-spy functionality.
-            It automatically tracks which section is currently in view and
-            provides smooth scrolling navigation.
-          </p>
-        </section>
-
-        <section id="features" ref={registerRef("features")} className="min-h-[300px]">
-          <h2 className="text-xl font-bold mb-3">Features</h2>
-          <ul className="list-disc list-inside text-neutral-600 text-sm space-y-1">
-            <li>Automatic header detection</li>
-            <li>Hysteresis to prevent flickering</li>
-            <li>Smooth scroll navigation</li>
-            <li>Container scroll support</li>
-            <li>Debug overlay included</li>
-          </ul>
-        </section>
-
-        <section id="usage" ref={registerRef("usage")} className="min-h-[300px]">
-          <h2 className="text-xl font-bold mb-3">Usage</h2>
-          <p className="text-neutral-600 text-sm">
-            Import the hook, define your section IDs, and use registerRef to
-            connect your sections. The activeId tells you which section is
-            currently visible.
-          </p>
-        </section>
-
-        <section id="api" ref={registerRef("api")} className="min-h-[300px]">
-          <h2 className="text-xl font-bold mb-3">API Reference</h2>
-          <p className="text-neutral-600 text-sm">
-            The hook returns activeId, registerRef, and scrollToSection.
-            Configure with offset, offsetRatio, and debounceMs options.
-          </p>
-        </section>
+      <main>
+        {SECTIONS.map(({ id, label, color }) => (
+          <section
+            key={id}
+            id={id}
+            ref={registerRef(id)}
+            className="flex items-center justify-center p-8"
+            style={{ minHeight: "100vh" }}
+          >
+            <div
+              className="relative w-full max-w-[430px] overflow-hidden rounded-lg"
+              style={{ aspectRatio: "3/2" }}
+            >
+              <div
+                className="absolute inset-0"
+                style={{ backgroundColor: color }}
+              />
+              <img src={`/images/${id}.jpg`} alt={label} className="absolute w-full h-full left-0 right-0 top-0 bottom-0 inset-0 object-cover" />
+            </div>
+          </section>
+        ))}
       </main>
     </div>
   );

@@ -1,3 +1,5 @@
+"use client";
+
 type IframeProps = {
   src: string;
   height?: number;
