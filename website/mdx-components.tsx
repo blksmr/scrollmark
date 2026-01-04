@@ -1,8 +1,8 @@
 import type { MDXComponents } from "mdx/types";
-import { Iframe } from "@/components/Iframe";
+import { Demo } from "@/components/Demo";
 
 export function getMDXComponents(): MDXComponents {
   return {
-    Iframe,
+    Demo,
   };
 }

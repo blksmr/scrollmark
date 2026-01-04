@@ -52,7 +52,7 @@ function transformContent(content: string): string {
   let transformed = `# ${title}\n\n${bodyContent}`;
 
   transformed = transformed.replace(
-    /<Iframe[^>]*\/>(\s*\n)*/g,
+    /<Demo[^>]*\/>(\s*\n)*/g,
     "",
   );
   transformed = transformed.replace(/\n{3,}/g, "\n\n");

@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import type { DebugInfo } from "scrowl";
+import type { ScrollState, SectionState } from "scrowl";
 
 type ProgressMap = Record<string, number>;
 
@@ -13,36 +13,40 @@ const MAX_WIDTH = 24;
 const MIN_OPACITY = 0.15;
 const MAX_OPACITY = 1;
 
-export function useNavProgress(sectionIds: string[], debugInfo: DebugInfo) {
+export function useNavProgress(
+  sectionIds: string[],
+  scroll: ScrollState,
+  sections: Record<string, SectionState>
+) {
   const sectionProgress = useMemo((): ProgressMap => {
     const progress: ProgressMap = {};
     sectionIds.forEach((id) => { progress[id] = 0; });
 
-    if (!debugInfo.sections.length) {
+    const sectionEntries = sectionIds.map(id => ({ id, ...sections[id] })).filter(s => s.bounds);
+    if (!sectionEntries.length) {
       progress[sectionIds[0]] = 1;
       return progress;
     }
 
-    const { scrollY, viewportHeight } = debugInfo;
-    const sections = debugInfo.sections;
-    const lastSection = sections[sections.length - 1];
+    const { y: scrollY, viewportHeight } = scroll;
+    const lastSection = sectionEntries[sectionEntries.length - 1];
     const scrollHeight = lastSection.bounds.bottom;
     const maxScroll = Math.max(1, scrollHeight - viewportHeight);
 
     const scrollProgress = Math.max(0, Math.min(1, scrollY / maxScroll));
-    const sectionIndex = scrollProgress * (sections.length - 1);
+    const sectionIndex = scrollProgress * (sectionEntries.length - 1);
 
     const lowerIndex = Math.floor(sectionIndex);
-    const upperIndex = Math.min(sections.length - 1, Math.ceil(sectionIndex));
+    const upperIndex = Math.min(sectionEntries.length - 1, Math.ceil(sectionIndex));
     const ratio = sectionIndex - lowerIndex;
 
-    progress[sections[lowerIndex].id] = 1 - ratio;
+    progress[sectionEntries[lowerIndex].id] = 1 - ratio;
     if (upperIndex !== lowerIndex) {
-      progress[sections[upperIndex].id] = ratio;
+      progress[sectionEntries[upperIndex].id] = ratio;
     }
 
     return progress;
-  }, [debugInfo, sectionIds]);
+  }, [scroll, sections, sectionIds]);
 
   const getIndicatorStyle = (id: string): IndicatorStyle => {
     const progress = sectionProgress[id] ?? 0;

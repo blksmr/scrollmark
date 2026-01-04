@@ -122,6 +122,11 @@ h1 + p,
 h2 + p,
 .shiki + p,
 h1 + .shiki,
+h2 + .shiki,
+h3 + .shiki,
+h4 + .shiki,
+h5 + .shiki,
+h6 + .shiki,
 p + .shiki,
 h1 + h2 {
   @apply mt-3;

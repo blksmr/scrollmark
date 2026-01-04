@@ -1,8 +1,7 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
-import { act } from '@testing-library/react';
-import { useScrowl } from '../useScrowl';
-import { useRef } from 'react';
+import { act, render, screen, waitFor } from "@testing-library/react";
+import type { useRef } from "react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { useScrowl } from "../useScrowl";
 
 function TestComponent({
   sectionIds,
@@ -16,7 +15,7 @@ function TestComponent({
   const { activeId, registerRef, scrollToSection } = useScrowl(
     sectionIds,
     containerRef,
-    options
+    options,
   );
 
   return (
@@ -28,14 +27,15 @@ function TestComponent({
           id={id}
           ref={registerRef(id)}
           data-testid={`section-${id}`}
-          style={{ height: '500px', marginBottom: '20px' }}
+          style={{ height: "500px", marginBottom: "20px" }}
         >
           {id}
         </section>
       ))}
       <button
+        type="button"
         data-testid="scroll-to-section2"
-        onClick={() => scrollToSection('section2')}
+        onClick={() => scrollToSection("section2")}
       >
         Scroll to Section 2
       </button>
@@ -43,184 +43,187 @@ function TestComponent({
   );
 }
 
-describe('useScrowl Integration Tests', () => {
+describe("useScrowl Integration Tests", () => {
   beforeEach(() => {
-    Object.defineProperty(window, 'innerHeight', {
+    Object.defineProperty(window, "innerHeight", {
       writable: true,
       value: 800,
     });
-    Object.defineProperty(window, 'innerWidth', {
+    Object.defineProperty(window, "innerWidth", {
       writable: true,
       value: 1200,
     });
-    Object.defineProperty(window, 'scrollY', {
+    Object.defineProperty(window, "scrollY", {
       writable: true,
       value: 0,
     });
-    Object.defineProperty(document.documentElement, 'scrollHeight', {
+    Object.defineProperty(document.documentElement, "scrollHeight", {
       writable: true,
       value: 2000,
     });
   });
 
-  describe('Real-world scenarios', () => {
-    it('should handle sticky navigation header', async () => {
-      const header = document.createElement('nav');
-      header.style.position = 'sticky';
-      header.style.top = '0';
-      header.style.height = '80px';
-      header.style.zIndex = '1000';
+  describe("Real-world scenarios", () => {
+    it("should handle sticky navigation header", async () => {
+      const header = document.createElement("nav");
+      header.style.position = "sticky";
+      header.style.top = "0";
+      header.style.height = "80px";
+      header.style.zIndex = "1000";
       document.body.appendChild(header);
 
-      const sections = ['intro', 'features'];
+      const sections = ["intro", "features"];
 
       render(
         <TestComponent
           sectionIds={sections}
           containerRef={null}
-          options={{ offset: 'auto' }}
-        />
+          options={{ offset: "auto" }}
+        />,
       );
 
       await waitFor(
         () => {
-          expect(screen.getByTestId('active-id').textContent).toBeTruthy();
+          expect(screen.getByTestId("active-id").textContent).toBeTruthy();
         },
-        { timeout: 2000 }
+        { timeout: 2000 },
       );
 
       document.body.removeChild(header);
     });
 
-    it('should work with nested scrollable container', async () => {
-      const container = document.createElement('div');
-      container.style.height = '600px';
-      container.style.overflow = 'auto';
-      container.id = 'scroll-container';
+    it("should work with nested scrollable container", async () => {
+      const container = document.createElement("div");
+      container.style.height = "600px";
+      container.style.overflow = "auto";
+      container.id = "scroll-container";
       document.body.appendChild(container);
 
       const containerRef = { current: container };
 
-      Object.defineProperty(container, 'scrollTop', {
+      Object.defineProperty(container, "scrollTop", {
         writable: true,
         value: 0,
       });
-      Object.defineProperty(container, 'scrollHeight', {
+      Object.defineProperty(container, "scrollHeight", {
         writable: true,
         value: 1500,
       });
-      Object.defineProperty(container, 'clientHeight', {
+      Object.defineProperty(container, "clientHeight", {
         writable: true,
         value: 600,
       });
 
-      const sections = ['section1', 'section2', 'section3'];
+      const sections = ["section1", "section2", "section3"];
 
       render(
         <TestComponent
           sectionIds={sections}
           containerRef={containerRef}
           options={{ offset: 100 }}
-        />
+        />,
       );
 
       act(() => {
-        Object.defineProperty(container, 'scrollTop', {
+        Object.defineProperty(container, "scrollTop", {
           writable: true,
           value: 700,
         });
-        container.dispatchEvent(new Event('scroll'));
+        container.dispatchEvent(new Event("scroll"));
       });
 
       await waitFor(
         () => {
-          const activeId = screen.getByTestId('active-id').textContent;
+          const activeId = screen.getByTestId("active-id").textContent;
           expect(activeId).toBeTruthy();
         },
-        { timeout: 2000 }
+        { timeout: 2000 },
       );
 
       document.body.removeChild(container);
     });
   });
 
-  describe('User interactions', () => {
-    it('should scroll to section when button is clicked', async () => {
+  describe("User interactions", () => {
+    it("should scroll to section when button is clicked", async () => {
       const mockScrollTo = vi.fn();
       window.scrollTo = mockScrollTo;
 
-      const sections = ['section1', 'section2', 'section3'];
+      const sections = ["section1", "section2", "section3"];
 
       render(<TestComponent sectionIds={sections} containerRef={null} />);
 
-      const scrollButton = screen.getByTestId('scroll-to-section2');
+      const scrollButton = screen.getByTestId("scroll-to-section2");
 
       act(() => {
         scrollButton.click();
       });
 
-      await waitFor(() => {
-        expect(mockScrollTo).toHaveBeenCalled();
-      }, { timeout: 1000 });
-    });
-  });
-
-  describe('Responsive behavior', () => {
-    it('should recalculate on window resize', async () => {
-      const sections = ['intro', 'features'];
-
-      render(<TestComponent sectionIds={sections} containerRef={null} />);
-
-      const initialActiveId = screen.getByTestId('active-id').textContent;
-
-      act(() => {
-        Object.defineProperty(window, 'innerHeight', {
-          writable: true,
-          value: 400,
-        });
-        window.dispatchEvent(new Event('resize'));
-      });
-
       await waitFor(
         () => {
-          const newActiveId = screen.getByTestId('active-id').textContent;
-          expect(newActiveId).toBeTruthy();
+          expect(mockScrollTo).toHaveBeenCalled();
         },
-        { timeout: 2000 }
+        { timeout: 1000 },
       );
     });
   });
 
-  describe('Edge cases in real scenarios', () => {
-    it('should handle page with many small sections', async () => {
+  describe("Responsive behavior", () => {
+    it("should recalculate on window resize", async () => {
+      const sections = ["intro", "features"];
+
+      render(<TestComponent sectionIds={sections} containerRef={null} />);
+
+      const _initialActiveId = screen.getByTestId("active-id").textContent;
+
+      act(() => {
+        Object.defineProperty(window, "innerHeight", {
+          writable: true,
+          value: 400,
+        });
+        window.dispatchEvent(new Event("resize"));
+      });
+
+      await waitFor(
+        () => {
+          const newActiveId = screen.getByTestId("active-id").textContent;
+          expect(newActiveId).toBeTruthy();
+        },
+        { timeout: 2000 },
+      );
+    });
+  });
+
+  describe("Edge cases in real scenarios", () => {
+    it("should handle page with many small sections", async () => {
       const manySections = Array.from({ length: 20 }, (_, i) => `section-${i}`);
 
       render(<TestComponent sectionIds={manySections} containerRef={null} />);
 
       await waitFor(
         () => {
-          expect(screen.getByTestId('active-id').textContent).toBe('section-0');
+          expect(screen.getByTestId("active-id").textContent).toBe("section-0");
         },
-        { timeout: 2000 }
+        { timeout: 2000 },
       );
     });
 
-    it('should handle sections that are larger than viewport', async () => {
-      const sections = ['large-section'];
+    it("should handle sections that are larger than viewport", async () => {
+      const sections = ["large-section"];
 
       render(<TestComponent sectionIds={sections} containerRef={null} />);
 
-      const section = screen.getByTestId('section-large-section');
-      Object.defineProperty(section, 'offsetHeight', {
+      const section = screen.getByTestId("section-large-section");
+      Object.defineProperty(section, "offsetHeight", {
         writable: true,
         value: 3000,
       });
 
       await waitFor(
         () => {
-          expect(screen.getByTestId('active-id').textContent).toBeTruthy();
+          expect(screen.getByTestId("active-id").textContent).toBeTruthy();
         },
-        { timeout: 2000 }
+        { timeout: 2000 },
       );
     });
   });

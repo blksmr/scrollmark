@@ -1,11 +1,10 @@
-export { useScrowl, default } from './useScrowl';
 export type {
-    DebugInfo,
-    ScrowlOptions,
-    UseScrowlReturn,
-    UseScrowlReturnWithDebug,
-    SectionProps,
-    NavProps
-} from './useScrowl';
-export { ScrowlDebugOverlay, default as ScrowlDebugOverlayDefault } from './ScrowlDebugOverlay';
-export type { ScrowlDebugOverlayProps } from './ScrowlDebugOverlay';
+  NavProps,
+  ScrollState,
+  ScrowlOptions,
+  SectionBounds,
+  SectionProps,
+  SectionState,
+  UseScrowlReturn,
+} from "./useScrowl";
+export { default, useScrowl } from "./useScrowl";

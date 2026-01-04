@@ -8,17 +8,21 @@ const SECTIONS = [
   { id: "mountains", label: "Mountains", caption: "mountain_peak_moody_clouds_dark_tones.jpg", color: "#9ba3ac" },
   { id: "forest", label: "Forest", caption: "dense_conifer_forest_pattern_aerial_view.jpg", color: "#7e8239" },
   { id: "coast", label: "Coast", caption: "ocean_waves_golden_hour_sunset_reflections.jpg", color: "#dba769" },
-] as const;
+];
 
 const SECTION_IDS = SECTIONS.map((s) => s.id);
 
 export function Basic() {
-  const { sectionProps, navProps, debugInfo } = useScrowl(SECTION_IDS, null, {
-    offset: 0,
-    debug: true,
+  const { 
+    sectionProps,
+    navProps,
+    scroll,
+    sections
+  } = useScrowl(SECTION_IDS, null, {
+    offset: 0
   });
 
-  const { getIndicatorStyle } = useNavProgress(SECTION_IDS, debugInfo);
+  const { getIndicatorStyle } = useNavProgress(SECTION_IDS, scroll, sections);
 
   return (
     <div className="relative min-h-screen bg-white">
