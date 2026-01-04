@@ -5,7 +5,9 @@ import { useScrowl } from "scrowl";
 const SECTION_IDS = ["intro", "features", "usage", "api"] as const;
 
 export function Basic() {
-  const { activeId, registerRef, scrollToSection } = useScrowl([...SECTION_IDS]);
+  const { activeId, registerRef, scrollToSection } = useScrowl([...SECTION_IDS], null, {
+    offset: 0,
+  });
 
   return (
     <div className="flex min-h-screen">
