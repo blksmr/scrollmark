@@ -7,8 +7,25 @@ const nextConfig = {
   reactStrictMode: true,
   pageExtensions: ["md", "mdx", "tsx", "ts", "jsx", "js"],
   transpilePackages: ["next-mdx-remote"],
-  output: "export",
-  distDir: "dist",
+  images: {
+    formats: ["image/webp"],
+    minimumCacheTTL: 2678400,
+    deviceSizes: [640, 750, 828, 1080, 1200],
+    imageSizes: [16, 32, 48, 64, 96],
+  },
+  async headers() {
+    return [
+      {
+        source: "/_next/image(.*)",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
+    ];
+  },
 };
 
 export default withMDX(nextConfig);
