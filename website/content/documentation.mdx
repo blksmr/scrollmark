@@ -97,14 +97,14 @@ Global scroll information updated on every scroll event.
 
 ```ts
 type ScrollState = {
-  y: number              // Current scroll position
-  progress: number       // Overall scroll progress (0-1)
-  direction: 'up' | 'down' | null
-  velocity: number       // Scroll speed
-  isScrolling: boolean   // True while actively scrolling
-  maxScroll: number      // Maximum scroll value
-  viewportHeight: number // Viewport height in pixels
-  offset: number         // Effective trigger offset
+  y: number                        // Current scroll position in pixels
+  progress: number                 // Overall scroll progress (0-1)
+  direction: 'up' | 'down' | null  // Scroll direction
+  velocity: number                 // Scroll speed
+  isScrolling: boolean             // True while actively scrolling
+  maxScroll: number                // Maximum scroll value
+  viewportHeight: number           // Viewport height in pixels
+  offset: number                   // Effective trigger offset
 }
 ```
 

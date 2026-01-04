@@ -124,6 +124,46 @@
     border-color: var(--border);
     @apply px-1.5 text-xs rounded-md border;
   }
+
+  table {
+    @apply w-full mt-4 text-sm border-collapse table-fixed;
+  }
+
+  thead {
+    @apply text-left;
+  }
+
+  th {
+    @apply py-2 px-3 font-medium border-b border-border;
+  }
+
+  th:first-child {
+    @apply w-[155px] pl-0 pr-0;
+  }
+
+  th:last-child {
+    @apply w-[45%] pr-0 pl-0;
+  }
+
+  td {
+    @apply py-3 px-3 border-b border-border align-top;
+  }
+
+  td:first-child {
+    @apply pl-0 pr-0;
+  }
+
+  td:last-child {
+    @apply pr-0 pl-0;
+  }
+
+  td:first-child code {
+    @apply whitespace-nowrap;
+  }
+
+  tr:last-child td {
+    @apply border-b-0;
+  }
 }
 
 p + p,

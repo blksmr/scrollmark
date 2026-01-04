@@ -14,7 +14,7 @@ export default function Page() {
   const MDX = page.data.body;
 
   return (
-    <article className="md:max-w-[640px] w-[80%] mx-auto py-32">
+    <article className="md:max-w-[680px] w-[80%] mx-auto py-32">
       <header className="flex w-full justify-between mb-6 items-center">
         <h1 className="flex gap-2 items-center">
           <Logo className="text-primary fill-primary" />
