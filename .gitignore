@@ -12,6 +12,17 @@ dist
 dist-ssr
 *.local
 
+# Next.js
+.next
+out
+build
+.turbo
+.vercel
+.swc
+
+# Fumadocs
+.source
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

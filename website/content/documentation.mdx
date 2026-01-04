@@ -1,0 +1,87 @@
+---
+title: "Scrowl"
+description: "A lightweight scroll spy hook for React"
+---
+
+Scrowl is a lightweight scroll spy hook for React. Track which section is in view, highlight nav items, and build smooth scrolling experiences.
+
+Uses `requestAnimationFrame` with throttling for 60fps performance. Hysteresis prevents jittery switching near section boundaries.
+
+For the source code, check out the [GitHub](https://github.com/blksmr/scrowl).
+
+# Features
+
+- **Auto Overlay Detection** - Automatically detects sticky/fixed headers and adjusts scroll offset. No manual config needed.
+- **Buttery Smooth** - RAF + throttling for 60fps performance. No jank, no polling, just smooth.
+- **Hysteresis Scoring** - Smart algorithm prevents jittery switching between sections while scrolling.
+- **Window & Container** - Works with both window scroll and custom scrollable containers.
+- **Debug Mode** - Visual overlay showing scroll position, trigger line, and section scores.
+- **TypeScript Ready** - Full type definitions included. Autocomplete everything.
+
+# Installation
+
+```bash
+npm install scrowl
+```
+
+# Usage
+
+It can be used anywhere in your application as follows.
+
+```tsx
+import { useScrowl } from 'scrowl'
+
+const sections = ['intro', 'features', 'api']
+
+function Page() {
+  const { activeId, registerRef } = useScrowl(sections)
+
+  return (
+    <>
+      <nav>
+        {sections.map(id => (
+          <a
+            key={id}
+            href={`#${id}`}
+            className={activeId === id ? 'active' : ''}
+          >
+            {id}
+          </a>
+        ))}
+      </nav>
+
+      <section id="intro" ref={registerRef('intro')}>...</section>
+      <section id="features" ref={registerRef('features')}>...</section>
+      <section id="api" ref={registerRef('api')}>...</section>
+    </>
+  )
+}
+```
+
+# API
+
+## Arguments
+
+- `sectionIds` `string[]` - Array of section IDs to track.
+- `containerRef` `RefObject<HTMLElement> | null` - Optional scrollable container. Defaults to window.
+- `options` `ScrowlOptions` - Configuration options (see below).
+
+## Options
+
+- `offset` `number | 'auto'` = `'auto'` - Trigger offset from top. 'auto' detects sticky/fixed headers.
+- `offsetRatio` `number` = `0.08` - Viewport ratio for trigger line calculation.
+- `debounceMs` `number` = `10` - Throttle delay in milliseconds.
+- `debug` `boolean` = `false` - Enables debug mode with debugInfo in return value.
+
+## Returns
+
+- `activeId` `string | null` - The ID of the currently active section.
+- `registerRef(id)` `(el: HTMLElement | null) => void` - Ref callback to attach to each section element.
+- `scrollToSection(id)` `(id: string) => void` - Programmatically scroll to a specific section.
+- `debugInfo` `DebugInfo` - Debug data (only when debug: true).
+
+# Support
+
+For any issues or feature requests, please open an issue on [GitHub](https://github.com/blksmr/scrowl/issues).
+
+You can also reach out to me on [Twitter](https://x.com/blkasmir).
