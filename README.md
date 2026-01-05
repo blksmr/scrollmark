@@ -1,6 +1,6 @@
-# Domet
+# domet ・ /ˈdɔ.met/
 
-Domet is a lightweight scroll spy hook for React. Track which section is in view, highlight nav items, and build smooth scrolling experiences.
+domet is a lightweight scroll spy hook for React. Track which section is in view, highlight nav items, and build smooth scrolling experiences.
 
 Uses `requestAnimationFrame` with throttling for 60fps performance. Hysteresis prevents jittery switching near section boundaries.
 
@@ -48,7 +48,7 @@ function Page() {
 |----------|------|-------------|
 | `sectionIds` | `string[]` | Array of section IDs to track |
 | `containerRef` | `RefObject<HTMLElement> \| null` | Scrollable container (defaults to `window`) |
-| `options` | `dometOptions` | Configuration options |
+| `options` | `DometOptions` | Configuration options |
 
 ### Options
 
@@ -128,7 +128,7 @@ type SectionBounds = {
 ### With Callbacks
 
 ```tsx
-const { activeId } = usedomet(sections, null, {
+const { activeId } = useDomet(sections, null, {
   onActiveChange: (id, prevId) => {
     console.log(`Changed from ${prevId} to ${id}`)
   },
@@ -141,7 +141,7 @@ const { activeId } = usedomet(sections, null, {
 ### Using Scroll State
 
 ```tsx
-const { scroll, sections } = usedomet(sectionIds)
+const { scroll, sections } = useDomet(sectionIds)
 
 // Global progress bar
 <div style={{ width: `${scroll.progress * 100}%` }} />
@@ -156,7 +156,7 @@ const { scroll, sections } = usedomet(sectionIds)
 
 ```tsx
 const containerRef = useRef<HTMLDivElement>(null)
-const { activeId } = usedomet(sections, containerRef)
+const { activeId } = useDomet(sections, containerRef)
 
 return (
   <div ref={containerRef} style={{ overflow: 'auto', height: '100vh' }}>
@@ -168,7 +168,7 @@ return (
 ### Fine-tuning Behavior
 
 ```tsx
-usedomet(sections, null, {
+useDomet(sections, null, {
   visibilityThreshold: 0.8,  // Require 80% visibility
   hysteresisMargin: 200,     // More resistance to switching
 })

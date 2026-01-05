@@ -1,4 +1,4 @@
-# domet
+# domet ・ /ˈdɔ.met/
 
 domet is a lightweight scroll spy hook for React. Track which section is in view, highlight nav items, and build smooth scrolling experiences.
 
