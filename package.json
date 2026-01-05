@@ -1,14 +1,6 @@
 {
-  "name": "domet",
-  "private": true,
+  "name": "domet-monorepo",
   "version": "1.0.0",
-  "description": "A lightweight scroll spy hook for React",
-  "type": "module",
-  "packageManager": "npm@11.6.2",
-  "workspaces": [
-    "packages/*",
-    "website"
-  ],
   "scripts": {
     "prepare": "husky",
     "dev": "turbo run dev",
@@ -25,5 +17,6 @@
     "husky": "^9.1.7",
     "turbo": "^2.5.4",
     "typescript": "5.8.3"
-  }
+  },
+  "packageManager": "npm@11.6.2"
 }

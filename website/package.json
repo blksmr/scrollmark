@@ -1,8 +1,7 @@
 {
   "name": "@domet/website",
-  "private": true,
   "version": "1.0.0",
-  "type": "module",
+  "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
