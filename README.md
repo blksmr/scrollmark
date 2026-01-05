@@ -4,7 +4,7 @@ Scrowl is a lightweight scroll spy hook for React. Track which section is in vie
 
 Uses `requestAnimationFrame` with throttling for 60fps performance. Hysteresis prevents jittery switching near section boundaries.
 
-For the source code, check out the [GitHub](https://github.com/nicmusic/scrowl).
+For the source code, check out the [GitHub](https://github.com/blksmr/scrowl).
 
 ## Installation
 
@@ -54,11 +54,12 @@ function Page() {
 
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
-| `offset` | `number \| 'auto'` | `'auto'` | Trigger offset from top. `'auto'` detects sticky/fixed headers |
+| `offset` | `number` | `0` | Trigger offset from top in pixels |
 | `offsetRatio` | `number` | `0.08` | Viewport ratio for trigger line calculation |
 | `debounceMs` | `number` | `10` | Throttle delay in milliseconds |
 | `visibilityThreshold` | `number` | `0.6` | Minimum visibility ratio (0-1) for section to get priority |
 | `hysteresisMargin` | `number` | `150` | Score margin to prevent rapid section switching |
+| `behavior` | `'smooth' \| 'instant' \| 'auto'` | `'auto'` | Scroll behavior. `'auto'` respects `prefers-reduced-motion` |
 
 ### Callbacks
 
@@ -91,14 +92,14 @@ Global scroll information updated on every scroll event.
 
 ```ts
 type ScrollState = {
-  y: number              // Current scroll position
-  progress: number       // Overall scroll progress (0-1)
-  direction: 'up' | 'down' | null
-  velocity: number       // Scroll speed
-  isScrolling: boolean   // True while actively scrolling
-  maxScroll: number      // Maximum scroll value
-  viewportHeight: number // Viewport height in pixels
-  offset: number         // Effective trigger offset
+  y: number                        // Current scroll position in pixels
+  progress: number                 // Overall scroll progress (0-1)
+  direction: 'up' | 'down' | null  // Scroll direction
+  velocity: number                 // Scroll speed
+  isScrolling: boolean             // True while actively scrolling
+  maxScroll: number                // Maximum scroll value
+  viewportHeight: number           // Viewport height in pixels
+  offset: number                   // Effective trigger offset
 }
 ```
 
@@ -170,10 +171,11 @@ return (
 useScrowl(sections, null, {
   visibilityThreshold: 0.8,  // Require 80% visibility
   hysteresisMargin: 200,     // More resistance to switching
-  debounceMs: 16,            // ~60fps updates
 })
 ```
 
 ## Support
 
-For issues or feature requests, open an issue on [GitHub](https://github.com/nicmusic/scrowl/issues).
+For issues or feature requests, open an issue on [GitHub](https://github.com/blksmr/scrowl).
+
+You can also reach out to me on [Twitter](https://x.com/blkasmir).

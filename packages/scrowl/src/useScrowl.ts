@@ -39,12 +39,15 @@ export type SectionState = {
   isActive: boolean;
 };
 
+export type ScrollBehavior = "smooth" | "instant" | "auto";
+
 export type ScrowlOptions = {
-  offset?: number | "auto";
+  offset?: number;
   offsetRatio?: number;
   debounceMs?: number;
   visibilityThreshold?: number;
   hysteresisMargin?: number;
+  behavior?: ScrollBehavior;
   onActiveChange?: (id: string | null, prevId: string | null) => void;
   onSectionEnter?: (id: string) => void;
   onSectionLeave?: (id: string) => void;
@@ -86,58 +89,18 @@ type SectionScore = {
   progress: number;
 };
 
-const OVERLAY_SELECTORS =
-  'header, nav, [role="banner"], [data-sticky], .sticky, .fixed, .fixed-header, .fixed-top, .navbar, .topbar, .app-bar';
-
-const isValidOverlay = (el: Element): boolean => {
-  if (el === document.documentElement || el === document.body) return false;
-
-  const htmlEl = el as HTMLElement;
-  if (htmlEl.id === "scrowl-debug-root") return false;
-  if (htmlEl.closest("#scrowl-debug-root")) return false;
-
-  const style = window.getComputedStyle(el);
-  if (style.position !== "fixed" && style.position !== "sticky") return false;
-
-  const zIndex = parseInt(style.zIndex, 10);
-  if (!Number.isNaN(zIndex) && zIndex >= 9998) return false;
-
-  const rect = el.getBoundingClientRect();
-  return rect.top >= 0 && rect.top <= 50 && rect.height > 0 && rect.width > 0;
-};
-
-const detectTopOverlayHeight = (): number => {
-  let maxBottom = 0;
-
-  const candidates = document.querySelectorAll(OVERLAY_SELECTORS);
-  for (const el of candidates) {
-    if (isValidOverlay(el)) {
-      maxBottom = Math.max(maxBottom, el.getBoundingClientRect().bottom);
-    }
-  }
-
-  if (maxBottom === 0) {
-    for (const el of document.body.children) {
-      if (isValidOverlay(el)) {
-        maxBottom = Math.max(maxBottom, el.getBoundingClientRect().bottom);
-      }
-    }
-  }
-
-  return maxBottom;
-};
-
 export function useScrowl(
   sectionIds: string[],
   containerRef: RefObject<HTMLElement> | null = null,
   options: ScrowlOptions = {},
 ): UseScrowlReturn {
   const {
-    offset = "auto",
+    offset = 0,
     offsetRatio = 0.08,
     debounceMs = 10,
     visibilityThreshold = DEFAULT_VISIBILITY_THRESHOLD,
     hysteresisMargin = DEFAULT_HYSTERESIS_MARGIN,
+    behavior = "auto",
     onActiveChange,
     onSectionEnter,
     onSectionLeave,
@@ -167,12 +130,6 @@ export function useScrowl(
     offset: 0,
   });
   const [sections, setSections] = useState<Record<string, SectionState>>({});
-  const [detectedOffset, setDetectedOffset] = useState<number | null>(() => {
-    if (offset === "auto" && typeof window !== "undefined") {
-      return detectTopOverlayHeight();
-    }
-    return null;
-  });
   const [containerElement, setContainerElement] = useState<HTMLElement | null>(
     null,
   );
@@ -216,46 +173,19 @@ export function useScrowl(
   };
 
   const getEffectiveOffset = useCallback((): number => {
-    if (offset === "auto") {
-      if (typeof window === "undefined") return 0;
-      return detectedOffset ?? detectTopOverlayHeight();
-    }
     return offset;
-  }, [offset, detectedOffset]);
-
-  useIsomorphicLayoutEffect(() => {
-    if (offset !== "auto") return;
-
-    const updateDetectedOffset = (): void => {
-      const detected = detectTopOverlayHeight();
-      setDetectedOffset(detected);
-    };
-
-    updateDetectedOffset();
-
-    let resizeTimeout: ReturnType<typeof setTimeout>;
-    const handleResize = (): void => {
-      clearTimeout(resizeTimeout);
-      resizeTimeout = setTimeout(updateDetectedOffset, 100);
-    };
-    window.addEventListener("resize", handleResize);
-
-    return () => {
-      clearTimeout(resizeTimeout);
-      window.removeEventListener("resize", handleResize);
-    };
   }, [offset]);
 
-  useIsomorphicLayoutEffect(() => {
-    if (offset !== "auto") return;
-
-    const timeoutId = setTimeout(() => {
-      const detected = detectTopOverlayHeight();
-      setDetectedOffset(detected);
-    }, 0);
-
-    return () => clearTimeout(timeoutId);
-  }, [offset]);
+  const getScrollBehavior = useCallback((): ScrollBehavior => {
+    if (behavior === "auto") {
+      if (typeof window === "undefined") return "instant";
+      const prefersReducedMotion = window.matchMedia(
+        "(prefers-reduced-motion: reduce)",
+      ).matches;
+      return prefersReducedMotion ? "instant" : "smooth";
+    }
+    return behavior;
+  }, [behavior]);
 
   useIsomorphicLayoutEffect(() => {
     const nextContainer = containerRef?.current ?? null;
@@ -370,25 +300,31 @@ export function useScrowl(
 
       scrollCleanupRef.current = cleanup;
 
+      const scrollBehavior = getScrollBehavior();
+
       if (container) {
         const containerRect = container.getBoundingClientRect();
         const relativeTop =
           elementRect.top - containerRect.top + container.scrollTop;
         container.scrollTo({
           top: relativeTop - effectiveOffset,
-          behavior: "smooth",
+          behavior: scrollBehavior,
         });
       } else {
         const absoluteTop = elementRect.top + window.scrollY;
         window.scrollTo({
           top: absoluteTop - effectiveOffset,
-          behavior: "smooth",
+          behavior: scrollBehavior,
         });
       }
 
-      resetDebounce();
+      if (scrollBehavior === "instant") {
+        doUnlock();
+      } else {
+        resetDebounce();
+      }
     },
-    [stableSectionIds, containerElement, getEffectiveOffset],
+    [stableSectionIds, containerElement, getEffectiveOffset, getScrollBehavior],
   );
 
   const sectionProps = useCallback(

@@ -49,12 +49,6 @@ Key constants:
 - `VISIBILITY_THRESHOLD = 0.6` (60% visibility required for high score)
 - `HYSTERESIS_SCORE_MARGIN = 150` (score difference needed to switch sections)
 
-### Overlay Detection
-
-`detectTopOverlayHeight()` scans all DOM elements for fixed/sticky headers to auto-calculate offset. It excludes:
-- Debug overlay elements (id `scrowl-debug-root`)
-- Elements with z-index >= 9998
-
 ### Performance
 
 - `requestAnimationFrame` for smooth 60fps updates

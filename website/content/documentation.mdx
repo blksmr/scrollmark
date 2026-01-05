@@ -60,11 +60,12 @@ function Page() {
 
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
-| `offset` | `number \| 'auto'` | `'auto'` | Trigger offset from top. `'auto'` detects sticky/fixed headers |
+| `offset` | `number` | `0` | Trigger offset from top in pixels |
 | `offsetRatio` | `number` | `0.08` | Viewport ratio for trigger line calculation |
 | `debounceMs` | `number` | `10` | Throttle delay in milliseconds |
 | `visibilityThreshold` | `number` | `0.6` | Minimum visibility ratio (0-1) for section to get priority |
 | `hysteresisMargin` | `number` | `150` | Score margin to prevent rapid section switching |
+| `behavior` | `'smooth' \| 'instant' \| 'auto'` | `'auto'` | Scroll behavior. `'auto'` respects `prefers-reduced-motion` |
 
 ### Callbacks
 

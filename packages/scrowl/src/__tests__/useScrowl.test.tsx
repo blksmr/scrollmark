@@ -288,7 +288,7 @@ describe("useScrowl", () => {
       });
 
       const { result } = renderHook(() =>
-        useScrowl(["section1"], null, { offset: "auto" }),
+        useScrowl(["section1"], null, { offset: 0 }),
       );
 
       act(() => {

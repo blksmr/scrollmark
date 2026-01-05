@@ -78,7 +78,7 @@ describe("useScrowl Integration Tests", () => {
         <TestComponent
           sectionIds={sections}
           containerRef={null}
-          options={{ offset: "auto" }}
+          options={{ offset: 0 }}
         />,
       );
 
