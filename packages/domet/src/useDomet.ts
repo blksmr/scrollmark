@@ -112,7 +112,9 @@ export function useDomet(
   const stableSectionIds = useMemo(() => sectionIds, [sectionIds]);
   const sectionIndexMap = useMemo(() => {
     const map = new Map<string, number>();
-    stableSectionIds.forEach((id, i) => map.set(id, i));
+    for (let i = 0; i < stableSectionIds.length; i++) {
+      map.set(stableSectionIds[i], i);
+    }
     return map;
   }, [stableSectionIds]);
 
@@ -214,9 +216,7 @@ export function useDomet(
     (id: string): void => {
       if (!stableSectionIds.includes(id)) {
         if (process.env.NODE_ENV !== "production") {
-          console.warn(
-            `[domet] scrollToSection: id "${id}" not in sectionIds`,
-          );
+          console.warn(`[domet] scrollToSection: id "${id}" not in sectionIds`);
         }
         return;
       }

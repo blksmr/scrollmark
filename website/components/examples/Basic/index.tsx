@@ -1,7 +1,7 @@
 "use client";
 
-import Image from "next/image";
 import { useDomet } from "domet";
+import Image from "next/image";
 import { useNavProgress } from "./useNavProgress";
 
 const SECTIONS = [
@@ -36,7 +36,7 @@ const SECTION_IDS = SECTIONS.map((s) => s.id);
 export function Basic() {
   const { sectionProps, navProps, scroll, sections } = useDomet(
     SECTION_IDS,
-    null
+    null,
   );
 
   const { getIndicatorStyle } = useNavProgress(SECTION_IDS, scroll, sections);

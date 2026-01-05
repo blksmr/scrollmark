@@ -8,6 +8,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "biome check .",
+    "lint:fix": "biome check . --write",
     "postinstall": "fumadocs-mdx"
   },
   "dependencies": {

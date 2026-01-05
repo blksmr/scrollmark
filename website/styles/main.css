@@ -207,13 +207,13 @@ h1 + h2 {
 }
 
 .shiki {
-  @apply relative w-full px-4 py-3 overflow-x-auto border border-border rounded-lg;
   background-color: var(--shiki-light-bg);
+  @apply relative w-full px-4 py-3 overflow-x-auto border border-border rounded-lg;
 
   & .line {
     span {
-      @apply font-mono text-xs leading-[18px];
       color: var(--shiki-light);
+      @apply font-mono text-xs leading-[18px];
     }
   }
 
@@ -221,16 +221,16 @@ h1 + h2 {
     counter-reset: line;
 
     & .line:before {
-      @apply inline-block w-3 mr-4 font-mono text-xs leading-[18px] text-right;
       color: color-mix(in srgb, var(--shiki-light) 20%, transparent);
       content: counter(line);
       counter-increment: line;
+      @apply inline-block w-3 mr-4 font-mono text-xs leading-[18px] text-right;
     }
   }
 
   &[data-line-numbers-max-digits="2"] {
     & > [data-line]:before {
-      @apply w-5
+      @apply w-5;
     }
   }
 

@@ -1,5 +1,5 @@
-import { useMemo } from "react";
 import type { ScrollState, SectionState } from "domet";
+import { useMemo } from "react";
 
 type ProgressMap = Record<string, number>;
 

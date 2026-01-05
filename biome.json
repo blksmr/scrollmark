@@ -30,7 +30,8 @@
       "rules": {
         "recommended": true,
         "suspicious": {
-          "noDuplicateProperties": "off"
+          "noDuplicateProperties": "off",
+          "noUnknownAtRules": "off"
         },
         "style": {
           "noDescendingSpecificity": "off"
@@ -64,6 +65,10 @@
       }
     },
     "css": {
+      "parser": {
+        "cssModules": true,
+        "tailwindDirectives": true
+      },
       "formatter": {
         "enabled": true
       },

@@ -40,7 +40,8 @@
     "dev": "tsc --watch",
     "lint": "biome check src",
     "lint:fix": "biome check src --write",
-    "test": "vitest",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui"
   },
