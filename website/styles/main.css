@@ -141,7 +141,6 @@
     @apply w-full mt-4 text-sm border-collapse table-fixed;
   }
 
-  /* Mobile: Make tables scrollable horizontally */
   @media (max-width: 768px) {
     .table-wrapper table {
       @apply table-auto;
