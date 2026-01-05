@@ -47,6 +47,7 @@ export default {
         text: "var(--text)",
         "text-muted": "var(--text-muted)",
         "text-hover": "var(--text-hover)",
+        "table-header-background": "var(--table-header-background)",
         border: "var(--border)",
         primary: "var(--primary)",
         secondary: "var(--background-secondary)",
