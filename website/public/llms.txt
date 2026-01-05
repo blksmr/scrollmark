@@ -6,7 +6,7 @@ Lightweight under the hood: a tight scroll loop and hysteresis for stable, flick
 
 For the source code, check out the [GitHub](https://github.com/blksmr/domet).
 
-## Installation Requires React 18 or higher
+## Installation 
 
 ```bash
 npm install domet

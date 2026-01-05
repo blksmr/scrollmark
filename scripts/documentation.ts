@@ -98,7 +98,7 @@ function transformContent(content: string): string {
 
   transformed = transformed.replace(/<Demo[^>]*\/>(\s*\n)*/g, "");
 
-  transformed = transformed.replace(/\+\+([^+]+)\+\+/g, "$1");
+  transformed = transformed.replace(/\+\+([^+]+)\+\+/g, "");
 
   transformed = transformed.replace(
     /<PropTable\s+items=\{\[([\s\S]*?)\]\}\s*\/>/g,
