@@ -27,7 +27,7 @@ export function Logo({
       viewBox="0 0 20 20"
       xmlns="http://www.w3.org/2000/svg"
       className={className}
-      aria-label="Scrowl logo"
+      aria-label="domet logo"
       {...props}
     >
       <g fill={fill}>

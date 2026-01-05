@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useScrowl } from "scrowl";
+import { useDomet } from "domet";
 import { useNavProgress } from "./useNavProgress";
 
 const SECTIONS = [
@@ -34,7 +34,7 @@ const SECTIONS = [
 const SECTION_IDS = SECTIONS.map((s) => s.id);
 
 export function Basic() {
-  const { sectionProps, navProps, scroll, sections } = useScrowl(
+  const { sectionProps, navProps, scroll, sections } = useDomet(
     SECTION_IDS,
     null
   );

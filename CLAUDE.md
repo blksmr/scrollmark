@@ -4,8 +4,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Scrowl is a React scroll-spy hook library. The monorepo contains:
-- `packages/scrowl`: The npm package (React hook for scroll tracking)
+domet is a React scroll-spy hook library. The monorepo contains:
+- `packages/domet`: The npm package (React hook for scroll tracking)
 - `website`: Next.js documentation site using Fumadocs
 
 ## Commands
@@ -18,14 +18,14 @@ npm run lint         # Lint all packages
 npm run test         # Run all tests
 ```
 
-### Package: scrowl
+### Package: domet
 ```bash
-cd packages/scrowl
+cd packages/domet
 npm run build        # Compile TypeScript
 npm run dev          # Watch mode
 npm test             # Run Vitest tests
 npm test -- --watch  # Watch mode
-npm test -- useScrowl.test.tsx  # Single test file
+npm test -- useDomet.test.tsx  # Single test file
 ```
 
 ### Website
@@ -37,7 +37,7 @@ npm run build        # Production build
 
 ## Architecture
 
-### Hook Algorithm (`useScrowl.ts`)
+### Hook Algorithm (`useDomet.ts`)
 
 The hook uses a **scoring system** to determine the active section:
 1. **Visibility score**: Sections with >60% visibility get bonus points
@@ -59,9 +59,8 @@ Key constants:
 ## Package Exports
 
 ```typescript
-import { useScrowl } from 'scrowl';
-import { ScrowlDebugOverlay } from 'scrowl';
-import type { DebugInfo, ScrowlOptions, UseScrowlReturn } from 'scrowl';
+import { useDomet } from 'domet';
+import type { DometOptions, UseDometReturn } from 'domet';
 ```
 
 ## Testing

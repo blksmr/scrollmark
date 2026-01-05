@@ -1,7 +1,7 @@
 import { Logo } from "@/components/Logo";
 import { getHomePage } from "@/lib/fumadocs";
 import { getMDXComponents } from "@/mdx-components";
-import scrowlPackage from "../../packages/scrowl/package.json";
+import dometPackage from "../../packages/domet/package.json";
 import { APP_NAME } from "@/config/site";
 
 export default function Page() {

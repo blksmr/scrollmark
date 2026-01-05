@@ -1,26 +1,26 @@
-# Scrowl
+# domet
 
-Scrowl is a lightweight scroll spy hook for React. Track which section is in view, highlight nav items, and build smooth scrolling experiences.
+domet is a lightweight scroll spy hook for React. Track which section is in view, highlight nav items, and build smooth scrolling experiences.
 
 Uses `requestAnimationFrame` with throttling for 60fps performance. Hysteresis prevents jittery switching near section boundaries.
 
-For the source code, check out the [GitHub](https://github.com/blksmr/scrowl).
+For the source code, check out the [GitHub](https://github.com/blksmr/domet).
 
 ## Installation
 
 ```bash
-npm install scrowl
+npm install domet
 ```
 
 ## Quick Start
 
 ```tsx
-import { useScrowl } from 'scrowl'
+import { useDomet } from 'domet'
 
 const sections = ['intro', 'features', 'api']
 
 function Page() {
-  const { activeId, sectionProps, navProps } = useScrowl(sections)
+  const { activeId, sectionProps, navProps } = useDomet(sections)
 
   return (
     <>
@@ -48,7 +48,7 @@ function Page() {
 |----------|------|-------------|
 | `sectionIds` | `string[]` | Array of section IDs to track |
 | `containerRef` | `RefObject<HTMLElement> \| null` | Scrollable container (defaults to `window`) |
-| `options` | `ScrowlOptions` | Configuration options |
+| `options` | `DometOptions` | Configuration options |
 
 ### Options
 
@@ -128,7 +128,7 @@ type SectionBounds = {
 ### With Callbacks
 
 ```tsx
-const { activeId } = useScrowl(sections, null, {
+const { activeId } = useDomet(sections, null, {
   onActiveChange: (id, prevId) => {
     console.log(`Changed from ${prevId} to ${id}`)
   },
@@ -141,7 +141,7 @@ const { activeId } = useScrowl(sections, null, {
 ### Using Scroll State
 
 ```tsx
-const { scroll, sections } = useScrowl(sectionIds)
+const { scroll, sections } = useDomet(sectionIds)
 
 // Global progress bar
 <div style={{ width: `${scroll.progress * 100}%` }} />
@@ -156,7 +156,7 @@ const { scroll, sections } = useScrowl(sectionIds)
 
 ```tsx
 const containerRef = useRef<HTMLDivElement>(null)
-const { activeId } = useScrowl(sections, containerRef)
+const { activeId } = useDomet(sections, containerRef)
 
 return (
   <div ref={containerRef} style={{ overflow: 'auto', height: '100vh' }}>
@@ -168,7 +168,7 @@ return (
 ### Fine-tuning Behavior
 
 ```tsx
-useScrowl(sections, null, {
+useDomet(sections, null, {
   visibilityThreshold: 0.8,  // Require 80% visibility
   hysteresisMargin: 200,     // More resistance to switching
 })
@@ -182,6 +182,6 @@ The name **domet** comes from Bosnian/Serbian/Croatian and means "reach" or "ran
 
 ## Support
 
-For issues or feature requests, open an issue on [GitHub](https://github.com/blksmr/scrowl).
+For issues or feature requests, open an issue on [GitHub](https://github.com/blksmr/domet).
 
 You can also reach out to me on [Twitter](https://x.com/blkasmir).

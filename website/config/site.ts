@@ -7,7 +7,7 @@ export const APP_URL = () => {
   if (process.env.CONTEXT === "deploy-preview") {
     return process.env.DEPLOY_PRIME_URL || "http://localhost:3000";
   }
-  return "https://scrowl.blksmr.com/";
+  return "https://domet.dev/";
 };
 
 export const APP_NAME = "domet ・ /ˈdɔ.met/";

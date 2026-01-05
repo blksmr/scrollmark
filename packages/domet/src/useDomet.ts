@@ -41,7 +41,7 @@ export type SectionState = {
 
 export type ScrollBehavior = "smooth" | "instant" | "auto";
 
-export type ScrowlOptions = {
+export type DometOptions = {
   offset?: number;
   offsetRatio?: number;
   debounceMs?: number;
@@ -58,7 +58,7 @@ export type ScrowlOptions = {
 export type SectionProps = {
   id: string;
   ref: (el: HTMLElement | null) => void;
-  "data-scrowl": string;
+  "data-domet": string;
 };
 
 export type NavProps = {
@@ -67,7 +67,7 @@ export type NavProps = {
   "data-active": boolean;
 };
 
-export type UseScrowlReturn = {
+export type UseDometReturn = {
   activeId: string | null;
   activeIndex: number;
   scroll: ScrollState;
@@ -89,11 +89,11 @@ type SectionScore = {
   progress: number;
 };
 
-export function useScrowl(
+export function useDomet(
   sectionIds: string[],
   containerRef: RefObject<HTMLElement> | null = null,
-  options: ScrowlOptions = {},
-): UseScrowlReturn {
+  options: DometOptions = {},
+): UseDometReturn {
   const {
     offset = 0,
     offsetRatio = 0.08,
@@ -215,7 +215,7 @@ export function useScrowl(
       if (!stableSectionIds.includes(id)) {
         if (process.env.NODE_ENV !== "production") {
           console.warn(
-            `[scrowl] scrollToSection: id "${id}" not in sectionIds`,
+            `[domet] scrollToSection: id "${id}" not in sectionIds`,
           );
         }
         return;
@@ -331,7 +331,7 @@ export function useScrowl(
     (id: string): SectionProps => ({
       id,
       ref: registerRef(id),
-      "data-scrowl": id,
+      "data-domet": id,
     }),
     [registerRef],
   );
@@ -694,4 +694,4 @@ export function useScrowl(
   };
 }
 
-export default useScrowl;
+export default useDomet;

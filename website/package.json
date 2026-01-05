@@ -1,5 +1,5 @@
 {
-  "name": "@scrowl/website",
+  "name": "@domet/website",
   "private": true,
   "version": "1.0.0",
   "type": "module",
@@ -21,7 +21,7 @@
     "next": "^15.1.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "scrowl": "*",
+    "domet": "*",
     "tailwind-merge": "^2.5.4",
     "zod": "^4.0.14"
   },

@@ -1,11 +1,11 @@
 export type {
+  DometOptions,
   NavProps,
   ScrollBehavior,
   ScrollState,
-  ScrowlOptions,
   SectionBounds,
   SectionProps,
   SectionState,
-  UseScrowlReturn,
-} from "./useScrowl";
-export { default, useScrowl } from "./useScrowl";
+  UseDometReturn,
+} from "./useDomet";
+export { default, useDomet } from "./useDomet";

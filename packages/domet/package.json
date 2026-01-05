@@ -1,16 +1,16 @@
 {
-  "name": "scrowl",
+  "name": "domet",
   "version": "1.0.0",
   "description": "A React hook for scroll tracking with smooth 60fps performance and smart hysteresis",
   "license": "MIT",
   "author": "blksmr",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/blksmr/scrowl.git"
+    "url": "git+https://github.com/blksmr/domet.git"
   },
-  "homepage": "https://scrowl.blksmr.com",
+  "homepage": "https://domet.dev",
   "bugs": {
-    "url": "https://github.com/blksmr/scrowl/issues"
+    "url": "https://github.com/blksmr/domet/issues"
   },
   "keywords": [
     "react",
