@@ -1,7 +1,7 @@
 {
   "name": "domet",
   "private": true,
-  "version": "1.0.1",
+  "version": "1.0.0",
   "description": "A lightweight scroll spy hook for React",
   "type": "module",
   "packageManager": "npm@11.6.2",
