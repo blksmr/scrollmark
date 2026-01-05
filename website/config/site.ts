@@ -7,12 +7,12 @@ export const APP_URL = () => {
   if (process.env.CONTEXT === "deploy-preview") {
     return process.env.DEPLOY_PRIME_URL || "http://localhost:3000";
   }
-  return "https://domet.dev/";
+  return "https://domet.blksmr.com";
 };
 
 export const APP_NAME = "domet ・ /ˈdɔ.met/";
 export const APP_DESCRIPTION = "A lightweight scroll spy hook for React";
-export const APP_OG_ENDPOINT = `${APP_URL()}/opengraph.png`;
+export const APP_OG_IMAGE = "/opengraph.png";
 
 export const KEYWORDS = [
   "scroll spy",
@@ -55,7 +55,7 @@ export const createBaseMetadata = ({
       siteName: APP_NAME,
       images: [
         {
-          url: `${APP_URL()}${APP_OG_ENDPOINT}`,
+          url: `${APP_URL()}${APP_OG_IMAGE}`,
           width: 1200,
           height: 630,
           alt: APP_NAME,
@@ -66,7 +66,7 @@ export const createBaseMetadata = ({
       card: "summary_large_image",
       title: metaTitle,
       description: metaDescription,
-      images: [`${APP_URL()}${APP_OG_ENDPOINT}`],
+      images: [`${APP_URL()}${APP_OG_IMAGE}`],
     },
     robots: {
       index: true,
