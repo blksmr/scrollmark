@@ -1,38 +1,52 @@
 import type { SVGProps } from "react";
 
 type IconProps = SVGProps<SVGSVGElement> & {
-  secondaryfill?: string;
   strokewidth?: number;
   title?: string;
+  size?: number | string;
 };
 
 export function OpenExternal({
   fill = "currentColor",
-  secondaryfill,
-  width = "0.75rem",
-  height = "0.75rem",
+  size = 14,
   ...props
 }: IconProps) {
-  const secondary = secondaryfill || fill;
-
   return (
     <svg
-      height={height}
-      width={width}
-      viewBox="0 0 12 12"
+      height={size}
+      width={size}
+      viewBox="0 0 20 20"
       xmlns="http://www.w3.org/2000/svg"
       {...props}
     >
-      <g
-        fill="none"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth="1.5"
-        stroke={fill}
-      >
-        <polyline points="7.75 7.5 7.75 4.25 4.5 4.25"></polyline>
-        <line x1="7.5" y1="4.5" x2=".75" y2="11.25"></line>
-        <path d="m5.785,10.25h2.965c1.105,0,2-.895,2-2V2.75c0-1.105-.895-2-2-2H3.75c-1.105,0-2,.895-2,2v3.465"></path>
+      <g fill={fill}>
+        <path
+          d="m11,6l-1.9645-1.9645c-1.3807-1.3807-3.6193-1.3807-5,0h0c-1.3807,1.3807-1.3807,3.6193,0,5l1.9645,1.9645"
+          fill="none"
+          stroke={fill}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth="2"
+        ></path>
+        <path
+          d="m9,14l1.9645,1.9645c1.3807,1.3807,3.6193,1.3807,5,0h0c1.3807-1.3807,1.3807-3.6193,0-5l-1.9645-1.9645"
+          fill="none"
+          stroke={fill}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth="2"
+        ></path>
+        <line
+          x1="12"
+          y1="12"
+          x2="8"
+          y2="8"
+          fill="none"
+          stroke={fill}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth="2"
+        ></line>
       </g>
     </svg>
   );

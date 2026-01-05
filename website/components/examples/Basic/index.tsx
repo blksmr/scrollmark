@@ -59,7 +59,7 @@ export function Basic() {
       </nav>
 
       <main>
-        {SECTIONS.map(({ id, label, caption, color }) => (
+        {SECTIONS.map(({ id, label, caption, color }, index) => (
           <section
             key={id}
             {...sectionProps(id)}
@@ -75,6 +75,7 @@ export function Basic() {
                   src={`/images/${id}.jpg`}
                   alt={label}
                   fill
+                  priority={index === 0}
                   className="object-cover"
                 />
               </div>

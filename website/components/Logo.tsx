@@ -24,23 +24,18 @@ export function Logo({
     <svg
       height={sizeValue}
       width={sizeValue}
-      viewBox="0 0 20 20"
+      viewBox="0 0 18 18"
       xmlns="http://www.w3.org/2000/svg"
       className={className}
       aria-label="domet logo"
       {...props}
     >
       <g fill={fill}>
-        <circle
-          cx="10"
-          cy="10"
-          fill={fill}
-          r="7"
-          stroke={fill}
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth="2"
-        />
+        <path
+          d="m14.25,15H3.75c-.4141,0-.75.3359-.75.75s.3359.75.75.75h10.5c.4141,0,.75-.3359.75-.75s-.3359-.75-.75-.75Z"
+          strokeWidth="0"
+        ></path>
+        <circle cx="9" cy="7.5" r="6" strokeWidth="0"></circle>
       </g>
     </svg>
   );

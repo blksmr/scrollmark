@@ -14,7 +14,7 @@ export default function Page() {
 
   return (
     <article className="md:max-w-[680px] w-11/12 mx-auto py-24 md:py-32">
-      <header className="flex w-full justify-between mb-6 items-center">
+      <header className="flex w-full mb-6">
         <h1 className="flex gap-2 items-center">
           {APP_NAME}
         </h1>

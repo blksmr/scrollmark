@@ -17,6 +17,12 @@ export default {
         "2xl": "1400px",
       },
     },
+    fontSize: {
+      xs: "12px",
+      sm: "13px",
+      base: "14px",
+      lg: "16px",
+    },
     extend: {
       fontFamily: {
         sans: [
@@ -38,28 +44,13 @@ export default {
         ],
       },
       colors: {
+        text: "var(--text)",
+        "text-muted": "var(--text-muted)",
+        "text-hover": "var(--text-hover)",
         border: "var(--border)",
         primary: "var(--primary)",
-        input: "var(--input)",
-        ring: "var(--ring)",
+        secondary: "var(--background-secondary)",
         background: "var(--background)",
-        foreground: "var(--foreground)",
-        secondary: {
-          DEFAULT: "var(--secondary)",
-          foreground: "var(--secondary-foreground)",
-        },
-        muted: {
-          DEFAULT: "var(--muted)",
-          foreground: "var(--muted-foreground)",
-        },
-        popover: {
-          DEFAULT: "var(--popover)",
-          foreground: "var(--popover-foreground)",
-        },
-        card: {
-          DEFAULT: "var(--card)",
-          foreground: "var(--card-foreground)",
-        },
       },
     },
   },

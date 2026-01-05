@@ -483,8 +483,10 @@ export function useDomet(
       };
     });
 
-    const isAtBottom = scrollY + viewportHeight >= scrollHeight - 5;
-    const isAtTop = scrollY <= 5;
+    const hasScroll = maxScroll > 10;
+    const isAtBottom =
+      hasScroll && scrollY + viewportHeight >= scrollHeight - 5;
+    const isAtTop = hasScroll && scrollY <= 5;
 
     let newActiveId: string | null = null;
 
