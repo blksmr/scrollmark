@@ -36,8 +36,9 @@ export default {
         ],
         mono: [
           "var(--font-mono)",
-          "Roboto Mono",
-          "SF Mono",
+          "ui-monospace",
+          "SFMono-Regular",
+          "Menlo",
           "Monaco",
           "Consolas",
           "monospace",

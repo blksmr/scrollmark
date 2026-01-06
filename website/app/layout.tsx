@@ -1,4 +1,5 @@
-import { Inter, Roboto_Mono } from "next/font/google";
+import { Inter } from "next/font/google";
+import { Geist_Mono } from 'next/font/google'
 import "@/styles/main.css";
 import type { Metadata, Viewport } from "next";
 import { siteConfig } from "@/config/site";
@@ -17,9 +18,10 @@ const inter = Inter({
   display: "swap",
 });
 
-const mono = Roboto_Mono({
+const geist = Geist_Mono({
   subsets: ["latin"],
   variable: "--font-mono",
+  weight: "400",
   display: "swap",
 });
 
@@ -30,7 +32,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} ${mono.variable}`}>
+      <body className={`${inter.variable} ${geist.variable}`}>
         {children}
       </body>
     </html>

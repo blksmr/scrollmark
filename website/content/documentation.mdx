@@ -4,7 +4,7 @@ description: "A lightweight scroll spy hook for React"
 ---
 <Demo src="examples/basic" caption="A quick example demonstrating how easy it is to use" />
 
-# Introduction
+### Introduction
 
 Domet is a lightweight React hook built for scroll-driven interfaces. Use it for classic scroll-spy, but also for progress indicators, lazy section loading, or any UI that needs reliable section awareness.
 
@@ -13,14 +13,14 @@ Lightweight under the hood: a tight scroll loop and hysteresis for stable, flick
 For the source code, check out the [GitHub](https://github.com/blksmr/domet).
 
 
-## Installation
+### Installation
 Install the package from your command line.
 
 ```bash
 npm install domet
 ```
 
-## Usage
+### Usage
 Basic example of how to use the hook.
 
 ```tsx showLineNumbers
@@ -50,9 +50,9 @@ function Page() {
 ```
 
 
-## API Reference
+### API Reference
 
-## Arguments
+### Arguments
 
 <PropTable items={[
   { name: "sectionIds", type: "string[]", description: "Array of section IDs to track" },
@@ -60,7 +60,7 @@ function Page() {
   { name: "options", type: "DometOptions", default: "{}", description: "Configuration options" },
 ]} />
 
-## Options
+### Options
 
 <PropTable items={[
   { name: "offset", type: "number", default: "0", description: "Trigger offset from top in pixels" },
@@ -71,7 +71,7 @@ function Page() {
   { name: "behavior", type: "'smooth' | 'instant' | 'auto'", default: "'auto'", description: "Scroll behavior. 'auto' respects prefers-reduced-motion" },
 ]} />
 
-## Callbacks
+### Callbacks
 
 <PropTable items={[
   { name: "onActiveChange", type: "(id: string | null, prevId: string | null) => void", description: "Called when active section changes" },
@@ -81,7 +81,7 @@ function Page() {
   { name: "onScrollEnd", type: "() => void", description: "Called when scrolling stops" },
 ]} />
 
-## Return Value
+### Return Value
 
 <PropTable items={[
   { name: "activeId", type: "string | null", description: "ID of the currently active section" },
@@ -94,9 +94,9 @@ function Page() {
   { name: "scrollToSection", type: "(id: string) => void", description: "Programmatically scroll to a section" },
 ]} />
 
-## Types
+### Types
 
-## ScrollState
+### ScrollState
 
 Global scroll information updated on every scroll event.
 
@@ -113,7 +113,7 @@ type ScrollState = {
 }
 ```
 
-## SectionState
+### SectionState
 
 Per-section state available for each tracked section.
 
@@ -133,9 +133,9 @@ type SectionBounds = {
 }
 ```
 
-## Examples
+### Examples
 
-## With Callbacks
+### With Callbacks
 
 ```tsx
 const { activeId } = useDomet(sections, null, {
@@ -148,7 +148,7 @@ const { activeId } = useDomet(sections, null, {
 })
 ```
 
-## Using Scroll State
+### Using Scroll State
 
 ```tsx
 const { scroll, sections } = useDomet(sectionIds)
@@ -162,7 +162,7 @@ const { scroll, sections } = useDomet(sectionIds)
 ))}
 ```
 
-## Custom Container
+### Custom Container
 
 ```tsx
 const containerRef = useRef<HTMLDivElement>(null)
@@ -175,7 +175,7 @@ return (
 )
 ```
 
-## Fine-tuning Behavior
+### Fine-tuning Behavior
 
 ```tsx
 useDomet(sections, null, {
@@ -184,13 +184,13 @@ useDomet(sections, null, {
 })
 ```
 
-## Why domet?
+### Why domet?
 
 This library was born from a real need at work. I wanted a scroll-spy solution that was powerful and completely headless, but above all, extremely lightweight. No bloated dependencies, no opinionated styling, just a hook that does one thing well.
 
 The name **domet** comes from Bosnian/Serbian/Croatian and means "reach" or "range" — the distance something can cover. Pronounced `/ˈdɔ.met/`: stress on the first syllable, open "o", and a hard "t" at the end.
 
-## Support
+### Support
 
 For issues or feature requests, open an issue on [GitHub](https://github.com/blksmr/domet).
 

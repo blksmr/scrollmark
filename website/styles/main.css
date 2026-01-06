@@ -12,10 +12,6 @@
     --primary: #8dc8e8;
     --border: oklch(0.93 0 0);
     --gray: oklch(0.98 0 0);
-
-    --font-mono:
-      var(--font-mono), "Roboto Mono", "SF Mono", Monaco, "Cascadia Code",
-      Consolas, "Courier New", monospace;
   }
 
   * {
@@ -54,17 +50,29 @@
     }
 
     h1,
-    h2 {
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
       @apply mt-12;
     }
 
     h1 + h2,
-    h2 + h2 {
+    h2 + h2,
+    h3 + h3,
+    h4 + h4,
+    h5 + h5,
+    h6 + h6 {
       @apply mt-6;
     }
 
     h1 + p,
-    h2 + p {
+    h2 + p,
+    h3 + p,
+    h4 + p,
+    h5 + p,
+    h6 + p {
       @apply mt-1;
     }
 
@@ -98,21 +106,21 @@
     }
 
     code {
-      @apply px-1.5 text-xs rounded-md border font-mono border-border bg-secondary;
+      @apply px-1.5 text-xs rounded-md border border-border bg-secondary;
     }
 
     pre code {
-      @apply px-0 border-0 bg-transparent text-xs leading-[18px] font-mono;
+      @apply px-0 border-0 bg-transparent text-xs leading-[18px];
     }
 
-    code, kbd, pre, samp {
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace;
+    .shiki, code, kbd, pre, samp {
+      @apply font-mono;
       font-feature-settings: normal;
       font-variation-settings: normal;
-  }
+    }
 
     kbd {
-      @apply font-mono bg-secondary border-border px-1.5 text-xs rounded-md border;
+      @apply bg-secondary border-border px-1.5 text-xs rounded-md border;
     }
 
     hr {
