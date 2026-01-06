@@ -12,9 +12,9 @@ export default function Page() {
   const MDX = page.data.body;
 
   return (
-    <article className="md:max-w-[680px] w-11/12 mx-auto py-24 md:py-32">
+    <article>
       <header className="flex w-full mb-6">
-        <h1 className="flex gap-2 items-center">{APP_NAME}</h1>
+        <div className="flex gap-2 items-center font-medium">{APP_NAME}</div>
       </header>
       <MDX components={getMDXComponents()} />
     </article>

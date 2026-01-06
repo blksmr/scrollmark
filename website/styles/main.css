@@ -5,12 +5,13 @@
 @layer base {
   :root {
     --text: oklch(0.22213 0 0);
-    --text-muted: oklch(0.6901 0 0);
+    --text-muted: oklch(0.79 0 0);
     --text-hover: oklch(0.30557 0 0);
     --background: #fff;
     --background-secondary: oklch(0.9821 0 0);
     --primary: #8dc8e8;
-    --border: oklch(0 0 0 / 7%);
+    --border: oklch(0.93 0 0);
+    --gray: oklch(0.98 0 0);
 
     --font-mono:
       var(--font-mono), "Roboto Mono", "SF Mono", Monaco, "Cascadia Code",
@@ -18,11 +19,11 @@
   }
 
   * {
+    --webkit-font-smoothing: antialiased;
+    --moz-osx-font-smoothing: grayscale;
+    font-variant-ligatures: common-ligatures;
+    text-rendering: optimizelegibility;
     @apply border-border;
-  }
-
-  html {
-    scroll-behavior: smooth;
   }
 
   html[data-iframe] {
@@ -34,78 +35,89 @@
     @apply hidden;
   }
 
-  body {
-    @apply bg-background antialiased leading-6 font-sans text-base text-text;
+  html {
+    scroll-behavior: smooth;
+    @apply text-text bg-background font-sans;
+
+    body {
+      @apply bg-background antialiased leading-6 font-sans text-base text-text;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6,
+    strong {
+      @apply font-medium;
+    }
+
+    h1,
+    h2 {
+      @apply mt-12;
+    }
+
+    h1 + h2,
+    h2 + h2 {
+      @apply mt-6;
+    }
+
+    h1 + p,
+    h2 + p {
+      @apply mt-1;
+    }
+
+    p {
+      @apply mt-1 leading-6;
+    }
+
+    figure,
+    pre {
+      @apply mt-6;
+    }
+
+    blockquote {
+      @apply my-4;
+    }
+
+    small {
+      @apply text-xs opacity-40 font-normal ml-auto;
+    }
+
+    a {
+      @apply text-text-muted hover:text-text-hover underline underline-offset-2 transition-colors duration-200;
+    }
+
+    ul {
+      @apply mt-3 space-y-2;
+    }
+
+    li {
+      @apply leading-6;
+    }
+
+    code {
+      @apply px-1.5 text-xs rounded-md border font-mono border-border bg-secondary;
+    }
+
+    pre code {
+      @apply px-0 border-0 bg-transparent text-xs leading-[18px] font-mono;
+    }
+
+    code, kbd, pre, samp {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace;
+      font-feature-settings: normal;
+      font-variation-settings: normal;
   }
 
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6,
-  strong {
-    @apply font-medium;
-  }
+    kbd {
+      @apply font-mono bg-secondary border-border px-1.5 text-xs rounded-md border;
+    }
 
-  p {
-    @apply mt-3 leading-6;
-  }
-
-  small {
-    @apply text-xs opacity-40 font-normal ml-auto;
-  }
-
-  a {
-    @apply text-text-muted hover:text-text-hover underline underline-offset-2 transition-colors duration-200;
-  }
-
-  ul {
-    @apply mt-3 space-y-2;
-  }
-
-  li {
-    @apply leading-6;
-  }
-
-  code {
-    @apply px-1.5 text-xs rounded-md border font-mono border-border bg-secondary;
-  }
-
-  pre code {
-    @apply px-0 border-0 bg-transparent text-xs leading-[18px] font-mono;
-  }
-
-  kbd {
-    @apply font-mono bg-secondary border-border px-1.5 text-xs rounded-md border;
-  }
-  
-  p + p,
-  h1 + p,
-  h2 + p,
-  .shiki + p,
-  h1 + .shiki,
-  h2 + .shiki,
-  h3 + .shiki,
-  h4 + .shiki,
-  h5 + .shiki,
-  h6 + .shiki,
-  p + .shiki,
-  h1 + h2 {
-    @apply mt-3;
-  }
-
-  * + h1,
-  * + h2,
-  * + h3,
-  * + h4,
-  * + h5,
-  * + h6 {
-    @apply mt-6;
-  }
-
-  hr {
-    @apply my-6 border-border;
+    hr {
+      @apply my-6 border-border;
+    }
   }
 }
 
@@ -124,7 +136,7 @@
   }
 
   .table-wrapper table {
-    @apply table-auto mt-4 text-sm border-collapse min-w-[600px] w-max;
+    @apply table-auto mt-6 text-sm border-collapse min-w-[600px] w-max;
   }
 
   .table-wrapper th:first-child,
@@ -179,15 +191,15 @@
     }
   }
 
-  &[data-line-numbers-max-digits="2"] > [data-line]:before {
+  &[data-line-numbers-max-digits="2"]>[data-line]:before {
     @apply w-5;
   }
 
-  &[data-line-numbers-max-digits="3"] > [data-line]:before {
+  &[data-line-numbers-max-digits="3"]>[data-line]:before {
     @apply w-7;
   }
 
-  &[data-line-numbers-max-digits="4"] > [data-line]:before {
+  &[data-line-numbers-max-digits="4"]>[data-line]:before {
     @apply w-9;
   }
 }

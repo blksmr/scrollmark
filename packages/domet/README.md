@@ -1,18 +1,22 @@
 # domet ・ /ˈdɔ.met/
 
-domet is a lightweight React hook built for scroll-driven interfaces. Use it for classic scroll-spy, but also for progress indicators, lazy section loading, or any UI that needs reliable section awareness.
+# Introduction
+
+Domet is a lightweight React hook built for scroll-driven interfaces. Use it for classic scroll-spy, but also for progress indicators, lazy section loading, or any UI that needs reliable section awareness.
 
 Lightweight under the hood: a tight scroll loop and hysteresis for stable, flicker-free section tracking.
 
 For the source code, check out the [GitHub](https://github.com/blksmr/domet).
 
-## Installation 
+## Installation
+Install the package from your command line.
 
 ```bash
 npm install domet
 ```
 
-## Quick Start
+## Usage
+Basic example of how to use the hook.
 
 ```tsx
 import { useDomet } from 'domet'
@@ -42,7 +46,7 @@ function Page() {
 
 ## API Reference
 
-### Arguments
+## Arguments
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
@@ -50,7 +54,7 @@ function Page() {
 | `containerRef` | `RefObject<HTMLElement> \| null` | `null` | Scrollable container (defaults to window) |
 | `options` | `DometOptions` | `{}` | Configuration options |
 
-### Options
+## Options
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
@@ -61,7 +65,7 @@ function Page() {
 | `hysteresisMargin` | `number` | `150` | Score margin to prevent rapid section switching |
 | `behavior` | `'smooth' \| 'instant' \| 'auto'` | `'auto'` | Scroll behavior. 'auto' respects prefers-reduced-motion |
 
-### Callbacks
+## Callbacks
 
 | Prop | Type | Description |
 |------|------|-------------|
@@ -71,7 +75,7 @@ function Page() {
 | `onScrollStart` | `() => void` | Called when scrolling starts |
 | `onScrollEnd` | `() => void` | Called when scrolling stops |
 
-### Return Value
+## Return Value
 
 | Prop | Type | Description |
 |------|------|-------------|
@@ -86,7 +90,7 @@ function Page() {
 
 ## Types
 
-### ScrollState
+## ScrollState
 
 Global scroll information updated on every scroll event.
 
@@ -103,7 +107,7 @@ type ScrollState = {
 }
 ```
 
-### SectionState
+## SectionState
 
 Per-section state available for each tracked section.
 
@@ -125,7 +129,7 @@ type SectionBounds = {
 
 ## Examples
 
-### With Callbacks
+## With Callbacks
 
 ```tsx
 const { activeId } = useDomet(sections, null, {
@@ -138,7 +142,7 @@ const { activeId } = useDomet(sections, null, {
 })
 ```
 
-### Using Scroll State
+## Using Scroll State
 
 ```tsx
 const { scroll, sections } = useDomet(sectionIds)
@@ -152,7 +156,7 @@ const { scroll, sections } = useDomet(sectionIds)
 ))}
 ```
 
-### Custom Container
+## Custom Container
 
 ```tsx
 const containerRef = useRef<HTMLDivElement>(null)
@@ -165,7 +169,7 @@ return (
 )
 ```
 
-### Fine-tuning Behavior
+## Fine-tuning Behavior
 
 ```tsx
 useDomet(sections, null, {

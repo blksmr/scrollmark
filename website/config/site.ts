@@ -10,7 +10,7 @@ export const APP_URL = () => {
   return "https://domet.blksmr.com";
 };
 
-export const APP_NAME = "domet ・ /ˈdɔ.met/";
+export const APP_NAME = "Domet";
 export const APP_DESCRIPTION = "A lightweight scroll spy hook for React";
 export const APP_OG_IMAGE = "/opengraph.png";
 

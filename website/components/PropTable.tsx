@@ -17,13 +17,13 @@ const cellPadding = "px-3 py-2"
 
 export function PropTable({ items }: PropTableProps) {
   return (
-    <div className="mt-3 w-full overflow-x-auto rounded-lg border border-border -webkit-overflow-scrolling-touch">
+    <div className="mt-6 w-full overflow-x-auto rounded-lg border border-border -webkit-overflow-scrolling-touch">
       <table className="min-w-[600px] w-full md:table-fixed md:min-w-full">
-        <thead className="border-border border-b bg-gray-50 text-left font-default text-default">
+        <thead className="border-border border-b bg-gray text-left font-default text-default">
           <tr>
-            <th className={cn(cellPadding, "md:w-[200px] font-normal text-small py-1.5 text-xs min-w-[140px]")}>Prop</th>
-            <th className={cn(cellPadding, "font-normal text-small py-1.5 text-xs")}>Type</th>
-            <th className={cn(cellPadding, "md:w-[170px] font-normal text-small py-1.5 text-xs min-w-[120px]")}>Default</th>
+            <th className={cn(cellPadding, "md:w-[200px] font-normal text-small text-xs min-w-[140px]")}>Prop</th>
+            <th className={cn(cellPadding, "font-normal text-small text-xs")}>Type</th>
+            <th className={cn(cellPadding, "md:w-[170px] font-normal text-small text-xs min-w-[120px]")}>Default</th>
           </tr>
         </thead>
         <tbody>

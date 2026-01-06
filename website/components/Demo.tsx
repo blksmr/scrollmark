@@ -11,7 +11,7 @@ export function Demo({ src, caption = "" }: DemoProps) {
   const fullSrc = src.startsWith("/") ? src : `/${src}`;
 
   return (
-    <div className="relative">
+    <figure className="relative">
       <iframe
         src={fullSrc}
         className="relative block w-full aspect-[640/470] overflow-y-auto overflow-x-hidden border border-border rounded-lg isolate no-scrollbar"
@@ -19,9 +19,9 @@ export function Demo({ src, caption = "" }: DemoProps) {
       />
       <div className="absolute bottom-3 right-3 flex items-center gap-2">
         {caption && (
-          <span className="px-2 bg-black/20 backdrop-blur-sm text-white rounded-full text-xs select-none">
+          <figcaption className="px-2 bg-black/20 backdrop-blur-sm text-white rounded-full text-xs select-none">
             {caption}
-          </span>
+          </figcaption>
         )}
       <a
         href={fullSrc}
@@ -33,6 +33,6 @@ export function Demo({ src, caption = "" }: DemoProps) {
         <Link2Icon />
       </a>
         </div>
-    </div>
+    </figure>
   );
 }
