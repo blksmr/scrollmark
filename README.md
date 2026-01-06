@@ -1,4 +1,4 @@
-# domet ・ /ˈdɔ.met/
+# Domet
 
 # Introduction
 

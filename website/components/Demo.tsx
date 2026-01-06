@@ -19,7 +19,7 @@ export function Demo({ src, caption = "" }: DemoProps) {
       />
       <div className="absolute bottom-3 right-3 flex items-center gap-2">
         {caption && (
-          <figcaption className="px-2 bg-black/30 backdrop-blur-sm text-white rounded-full text-xs select-none">
+          <figcaption className="px-2 bg-black/30 backdrop-blur-sm text-white rounded-full text-xs select-none truncate max-w-[150px] sm:max-w-none">
             {caption}
           </figcaption>
         )}
