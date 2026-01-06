@@ -3,16 +3,13 @@ import {
   rehypeCodeDefaultOptions,
   remarkNpm,
 } from "fumadocs-core/mdx-plugins";
-import { remarkInstall } from "fumadocs-docgen";
 import {
   defineConfig,
   defineDocs,
   frontmatterSchema,
   metaSchema,
 } from "fumadocs-mdx/config";
-import { remarkSmall } from "./lib/remark-small";
-
-import type { z } from "zod";
+import { transformerEmptyLines, transformerLineNumbers } from "./lib/shiki-transformers";
 
 export const docs = defineDocs({
   dir: "content",
@@ -26,19 +23,22 @@ export const docs = defineDocs({
 
 export default defineConfig({
   lastModifiedTime: "git",
+  
   mdxOptions: {
-    remarkPlugins: [remarkNpm, remarkSmall],
+    remarkPlugins: [remarkNpm],
     rehypeCodeOptions: {
       themes: {
         light: "github-light",
         dark: "github-dark",
       },
-      inline: "tailing-curly-colon",
+      langs: ["bash", "typescript", "tsx", "javascript", "json", "html", "css", "markdown", "yaml"],
       defaultColor: false,
-      transformers: [...(rehypeCodeDefaultOptions.transformers ?? [])],
+      transformers: [
+        ...(rehypeCodeDefaultOptions.transformers ?? []),
+        transformerEmptyLines(),
+        transformerLineNumbers(),
+      ]
     },
     rehypePlugins: [rehypeCode],
-  },
+  }
 });
-
-export type Frontmatter = z.infer<typeof docs.docs.schema>;

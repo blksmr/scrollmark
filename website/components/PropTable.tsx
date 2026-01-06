@@ -21,7 +21,7 @@ export function PropTable({ items }: PropTableProps) {
       <table className="min-w-[600px] w-full md:table-fixed md:min-w-full">
         <thead className="border-border border-b bg-gray text-left font-default text-default">
           <tr>
-            <th className={cn(cellPadding, "md:w-[200px] font-normal text-small text-xs min-w-[140px]")}>Prop</th>
+            <th className={cn(cellPadding, "md:w-[200px] font-normal text-small text-xs min-w-[140px]")}>Property</th>
             <th className={cn(cellPadding, "font-normal text-small text-xs")}>Type</th>
             <th className={cn(cellPadding, "md:w-[170px] font-normal text-small text-xs min-w-[120px]")}>Default</th>
           </tr>

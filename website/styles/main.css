@@ -175,6 +175,10 @@
   background-color: var(--shiki-light-bg);
   @apply relative w-full px-4 py-3 overflow-x-auto border border-border rounded-lg;
 
+  & code {
+    @apply grid;
+  }
+
   & .line span {
     color: var(--shiki-light);
     @apply font-mono text-xs leading-[18px];

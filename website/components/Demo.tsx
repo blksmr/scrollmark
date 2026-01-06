@@ -19,7 +19,7 @@ export function Demo({ src, caption = "" }: DemoProps) {
       />
       <div className="absolute bottom-3 right-3 flex items-center gap-2">
         {caption && (
-          <figcaption className="px-2 bg-black/20 backdrop-blur-sm text-white rounded-full text-xs select-none">
+          <figcaption className="px-2 bg-black/30 backdrop-blur-sm text-white rounded-full text-xs select-none">
             {caption}
           </figcaption>
         )}
@@ -27,7 +27,7 @@ export function Demo({ src, caption = "" }: DemoProps) {
         href={fullSrc}
         target="_blank"
         rel="noopener noreferrer"
-        className="p-1 bg-fd-background/80 backdrop-blur-sm border border-border rounded-lg text-fd-muted-foreground hover:text-fd-foreground hover:bg-fd-background transition-colors"
+        className="p-1 bg-fd-background/80 backdrop-blur-sm border border-border rounded-full text-fd-muted-foreground hover:text-fd-foreground hover:bg-fd-background transition-colors"
         title="Ouvrir dans un nouvel onglet"
         >
         <Link2Icon />
