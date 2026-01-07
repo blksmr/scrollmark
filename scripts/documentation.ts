@@ -11,10 +11,12 @@ interface SyncResults {
 
 interface FrontmatterData {
   title?: string;
+  description?: string;
   [key: string]: string | undefined;
 }
 
 const sourceFile = path.join(__dirname, "../website/content/documentation.mdx");
+const siteConfigFile = path.join(__dirname, "../website/config/site.ts");
 const targetFiles: Record<string, string> = {
   "README.md": path.join(__dirname, "../README.md"),
   "website/public/llms.txt": path.join(__dirname, "../website/public/llms.txt"),
@@ -37,9 +39,13 @@ function extractFrontmatter(content: string): {
   const remainingContent = content.slice(frontmatterMatch[0].length);
 
   const titleMatch = frontmatterYaml.match(/title:\s*["']?(.*?)["']?\s*$/m);
+  const descMatch = frontmatterYaml.match(/description:\s*["']?(.*?)["']?\s*$/m);
   const frontmatter: FrontmatterData = {};
   if (titleMatch) {
     frontmatter.title = titleMatch[1];
+  }
+  if (descMatch) {
+    frontmatter.description = descMatch[1];
   }
 
   return { frontmatter, content: remainingContent };
@@ -113,6 +119,28 @@ function transformContent(content: string): string {
   return `${transformed.trim()}\n`;
 }
 
+function updateSiteConfig(frontmatter: FrontmatterData): "success" | "error" {
+  try {
+    const content = fs.readFileSync(siteConfigFile, "utf8");
+    const title = frontmatter.title || "Domet";
+    const description = frontmatter.description || "A lightweight scroll spy hook for React";
+
+    let updated = content.replace(
+      /export const APP_NAME = ".*?";/,
+      `export const APP_NAME = "${title}";`
+    );
+    updated = updated.replace(
+      /export const APP_DESCRIPTION = ".*?";/,
+      `export const APP_DESCRIPTION = "${description}";`
+    );
+
+    fs.writeFileSync(siteConfigFile, updated);
+    return "success";
+  } catch {
+    return "error";
+  }
+}
+
 function formatTreeOutput(results: SyncResults): void {
   console.log("○ Syncing Documentation");
 
@@ -131,6 +159,12 @@ function syncDocumentation(): void {
 
   try {
     const sourceContent = fs.readFileSync(sourceFile, "utf8");
+    const { frontmatter } = extractFrontmatter(sourceContent);
+
+    results["website/config/site.ts"] = updateSiteConfig(frontmatter);
+    if (results["website/config/site.ts"] === "success") {
+      updatedFiles.push("website/config/site.ts");
+    }
 
     const transformedContent = transformContent(sourceContent);
 

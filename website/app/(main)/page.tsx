@@ -1,8 +1,10 @@
-import { APP_NAME } from "@/config/site";
+import { APP_NAME, siteConfig } from "@/config/site";
 import { getHomePage } from "@/lib/fumadocs";
 import { getMDXComponents } from "@/mdx-components";
 import packageJson from "../../../packages/domet/package.json";
 import Link from "next/link";
+
+export const metadata = siteConfig;
 
 export default function Page() {
   const page = getHomePage();
