@@ -33,9 +33,18 @@ export type SectionState = {
 
 export type ScrollBehavior = "smooth" | "instant" | "auto";
 
+export type ScrollToPosition = "top" | "center" | "bottom";
+
+export type ScrollTarget =
+  | string
+  | { id: string }
+  | { top: number };
+
 export type ScrollToOptions = {
   offset?: Offset;
   behavior?: ScrollBehavior;
+  position?: ScrollToPosition;
+  lockActive?: boolean;
 };
 
 export type DometOptions = {
@@ -88,7 +97,7 @@ export type UseDometReturn = {
   scroll: ScrollState;
   sections: Record<string, SectionState>;
   ids: string[];
-  scrollTo: (id: string, options?: ScrollToOptions) => void;
+  scrollTo: (target: ScrollTarget, options?: ScrollToOptions) => void;
   register: (id: string) => RegisterProps;
   link: (id: string) => LinkProps;
 };

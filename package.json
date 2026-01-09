@@ -6,6 +6,7 @@
     "prepare": "husky",
     "dev": "turbo run dev",
     "test": "turbo run test",
+    "test:e2e": "npm run test:e2e -w packages/domet",
     "lint": "turbo run lint",
     "build": "turbo run build",
     "start": "cd website && npm run start",

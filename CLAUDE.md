@@ -55,6 +55,7 @@ Key constants:
 - Throttling with configurable `debounceMs` (default 10ms)
 - Refs stored in `useRef` to avoid re-renders
 - `useMemo` for stable section ID arrays
+- The container ref is assumed stable for the lifetime of the hook; remount the hook to change it
 
 ## Package Exports
 

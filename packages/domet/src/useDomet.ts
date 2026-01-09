@@ -1,4 +1,12 @@
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import type {
   DometOptions,
   LinkProps,
@@ -6,7 +14,9 @@ import type {
   ResolvedSection,
   ScrollBehavior,
   ScrollState,
+  ScrollTarget,
   ScrollToOptions,
+  ScrollToPosition,
   SectionState,
   UseDometReturn,
 } from "./types";
@@ -37,6 +47,79 @@ import {
 const useIsomorphicLayoutEffect =
   typeof window !== "undefined" ? useLayoutEffect : useEffect;
 
+type ScrollSnapshot = {
+  scrollY: number;
+  viewportHeight: number;
+  scrollHeight: number;
+};
+
+const defaultSnapshot: ScrollSnapshot = {
+  scrollY: 0,
+  viewportHeight: 0,
+  scrollHeight: 0,
+};
+
+function getScrollSnapshot(container: HTMLElement | null): ScrollSnapshot {
+  if (typeof window === "undefined") {
+    return defaultSnapshot;
+  }
+
+  if (container) {
+    return {
+      scrollY: container.scrollTop,
+      viewportHeight: container.clientHeight,
+      scrollHeight: container.scrollHeight,
+    };
+  }
+
+  return {
+    scrollY: window.scrollY,
+    viewportHeight: window.innerHeight,
+    scrollHeight: document.documentElement.scrollHeight,
+  };
+}
+
+function useScrollSnapshot(container: HTMLElement | null): ScrollSnapshot {
+  const subscribe = useCallback(
+    (onStoreChange: () => void) => {
+      if (typeof window === "undefined") {
+        return () => {};
+      }
+
+      const target = container ?? window;
+      const handleChange = () => onStoreChange();
+
+      target.addEventListener("scroll", handleChange, { passive: true });
+      window.addEventListener("resize", handleChange, { passive: true });
+
+      return () => {
+        target.removeEventListener("scroll", handleChange);
+        window.removeEventListener("resize", handleChange);
+      };
+    },
+    [container]
+  );
+
+  const getSnapshot = useCallback(
+    () => getScrollSnapshot(container),
+    [container]
+  );
+
+  const getServerSnapshot = useCallback(() => defaultSnapshot, []);
+
+  return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+}
+
+function areIdInputsEqual(a: unknown, b: unknown): boolean {
+  if (Object.is(a, b)) return true;
+  if (!Array.isArray(a) || !Array.isArray(b)) return false;
+  if (a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i++) {
+    if (!Object.is(a[i], b[i])) return false;
+  }
+  return true;
+}
+
 export function useDomet(options: DometOptions): UseDometReturn {
   const {
     container: containerInput,
@@ -56,8 +139,31 @@ export function useDomet(options: DometOptions): UseDometReturn {
   const rawIds = "ids" in options ? options.ids : undefined;
   const rawSelector = "selector" in options ? options.selector : undefined;
 
-  const idsArray = rawIds !== undefined ? sanitizeIds(rawIds) : undefined;
-  const selectorString = rawSelector !== undefined ? sanitizeSelector(rawSelector) : undefined;
+  const idsCacheRef = useRef<{
+    raw: unknown;
+    sanitized: string[] | undefined;
+  }>({ raw: undefined, sanitized: undefined });
+
+  const idsArray = useMemo(() => {
+    if (rawIds === undefined) {
+      idsCacheRef.current = { raw: undefined, sanitized: undefined };
+      return undefined;
+    }
+
+    if (areIdInputsEqual(rawIds, idsCacheRef.current.raw)) {
+      idsCacheRef.current.raw = rawIds;
+      return idsCacheRef.current.sanitized;
+    }
+
+    const sanitized = sanitizeIds(rawIds);
+    idsCacheRef.current = { raw: rawIds, sanitized };
+    return sanitized;
+  }, [rawIds]);
+
+  const selectorString = useMemo(() => {
+    if (rawSelector === undefined) return undefined;
+    return sanitizeSelector(rawSelector);
+  }, [rawSelector]);
   const useSelector = selectorString !== undefined && selectorString !== "";
 
   const initialActiveId = idsArray && idsArray.length > 0 ? idsArray[0] : null;
@@ -80,6 +186,7 @@ export function useDomet(options: DometOptions): UseDometReturn {
 
   const refs = useRef<Record<string, HTMLElement | null>>({});
   const refCallbacks = useRef<Record<string, (el: HTMLElement | null) => void>>({});
+  const registerPropsCache = useRef<Record<string, RegisterProps>>({});
   const activeIdRef = useRef<string | null>(initialActiveId);
   const lastScrollY = useRef<number>(0);
   const lastScrollTime = useRef<number>(Date.now());
@@ -104,14 +211,19 @@ export function useDomet(options: DometOptions): UseDometReturn {
     onScrollEnd,
   });
 
-  optionsRef.current = { offset, behavior };
-  callbackRefs.current = {
-    onActive,
-    onEnter,
-    onLeave,
-    onScrollStart,
-    onScrollEnd,
-  };
+  useIsomorphicLayoutEffect(() => {
+    optionsRef.current = { offset, behavior };
+  }, [offset, behavior]);
+
+  useIsomorphicLayoutEffect(() => {
+    callbackRefs.current = {
+      onActive,
+      onEnter,
+      onLeave,
+      onScrollStart,
+      onScrollEnd,
+    };
+  }, [onActive, onEnter, onLeave, onScrollStart, onScrollEnd]);
 
   const sectionIds = useMemo(() => {
     if (!useSelector && idsArray) return idsArray;
@@ -133,22 +245,26 @@ export function useDomet(options: DometOptions): UseDometReturn {
     }
   }, [containerInput]);
 
+  const updateSectionsFromSelector = useCallback((selector: string) => {
+    const resolved = resolveSectionsFromSelector(selector);
+    setResolvedSections(resolved);
+    if (resolved.length > 0) {
+      const currentStillExists = resolved.some((s) => s.id === activeIdRef.current);
+      if (!activeIdRef.current || !currentStillExists) {
+        activeIdRef.current = resolved[0].id;
+        setActiveId(resolved[0].id);
+      }
+    } else if (activeIdRef.current !== null) {
+      activeIdRef.current = null;
+      setActiveId(null);
+    }
+  }, []);
+
   useIsomorphicLayoutEffect(() => {
     if (useSelector && selectorString) {
-      const resolved = resolveSectionsFromSelector(selectorString);
-      setResolvedSections(resolved);
-      if (resolved.length > 0) {
-        const currentStillExists = resolved.some((s) => s.id === activeIdRef.current);
-        if (!activeIdRef.current || !currentStillExists) {
-          activeIdRef.current = resolved[0].id;
-          setActiveId(resolved[0].id);
-        }
-      } else if (activeIdRef.current !== null) {
-        activeIdRef.current = null;
-        setActiveId(null);
-      }
+      updateSectionsFromSelector(selectorString);
     }
-  }, [selectorString, useSelector]);
+  }, [selectorString, useSelector, updateSectionsFromSelector]);
 
   useEffect(() => {
     if (
@@ -160,26 +276,13 @@ export function useDomet(options: DometOptions): UseDometReturn {
       return;
     }
 
-    const resolveSections = () => {
-      const resolved = resolveSectionsFromSelector(selectorString);
-      setResolvedSections(resolved);
-      if (resolved.length > 0) {
-        const currentStillExists = resolved.some((s) => s.id === activeIdRef.current);
-        if (!activeIdRef.current || !currentStillExists) {
-          activeIdRef.current = resolved[0].id;
-          setActiveId(resolved[0].id);
-        }
-      } else if (activeIdRef.current !== null) {
-        activeIdRef.current = null;
-        setActiveId(null);
-      }
-    };
-
     const handleMutation = () => {
       if (mutationDebounceRef.current) {
         clearTimeout(mutationDebounceRef.current);
       }
-      mutationDebounceRef.current = setTimeout(resolveSections, 50);
+      mutationDebounceRef.current = setTimeout(() => {
+        updateSectionsFromSelector(selectorString);
+      }, 50);
     };
 
     mutationObserverRef.current = new MutationObserver(handleMutation);
@@ -200,7 +303,7 @@ export function useDomet(options: DometOptions): UseDometReturn {
         mutationObserverRef.current = null;
       }
     };
-  }, [useSelector, selectorString]);
+  }, [useSelector, selectorString, updateSectionsFromSelector]);
 
   useEffect(() => {
     if (!useSelector && idsArray) {
@@ -269,129 +372,234 @@ export function useDomet(options: DometOptions): UseDometReturn {
   }, [useSelector, idsArray, resolvedSections]);
 
   const scrollTo = useCallback(
-    (id: string, scrollOptions?: ScrollToOptions): void => {
-      if (!sectionIndexMap.has(id)) {
-        if (process.env.NODE_ENV !== "production") {
-          console.warn(`[domet] scrollTo: id "${id}" not found`);
-        }
-        return;
-      }
+    (target: ScrollTarget, scrollOptions?: ScrollToOptions): void => {
+      const resolvedTarget = typeof target === "string"
+        ? { type: "id" as const, id: target }
+        : "id" in target
+          ? { type: "id" as const, id: target.id }
+          : { type: "top" as const, top: target.top };
 
-      const currentSections = getCurrentSections();
-      const section = currentSections.find((s) => s.id === id);
-      if (!section) {
-        if (process.env.NODE_ENV !== "production") {
-          console.warn(`[domet] scrollTo: element for id "${id}" not yet mounted`);
-        }
-        return;
-      }
-
-      scrollCleanupRef.current?.();
-
-      isProgrammaticScrolling.current = true;
-      activeIdRef.current = id;
-      setActiveId(id);
-
+      const lockActive = scrollOptions?.lockActive ?? resolvedTarget.type === "id";
       const container = containerElement;
-      const elementRect = section.element.getBoundingClientRect();
+      const scrollTarget = container || window;
       const viewportHeight = container ? container.clientHeight : window.innerHeight;
-
+      const scrollHeight = container
+        ? container.scrollHeight
+        : document.documentElement.scrollHeight;
+      const maxScroll = Math.max(0, scrollHeight - viewportHeight);
+      const scrollBehavior = getResolvedBehavior(scrollOptions?.behavior);
       const offsetValue = scrollOptions?.offset !== undefined
         ? sanitizeOffset(scrollOptions.offset)
         : optionsRef.current.offset;
       const effectiveOffset = resolveOffset(offsetValue, viewportHeight, DEFAULT_OFFSET);
 
-      const scrollTarget = container || window;
-
-      const unlockScroll = () => {
+      const stopProgrammaticScroll = () => {
+        if (scrollCleanupRef.current) {
+          scrollCleanupRef.current();
+          scrollCleanupRef.current = null;
+        }
         isProgrammaticScrolling.current = false;
-        requestAnimationFrame(() => {
-          recalculateRef.current();
-        });
       };
 
-      let debounceTimer: ReturnType<typeof setTimeout> | null = null;
-      let isUnlocked = false;
-
-      const cleanup = () => {
-        if (debounceTimer) {
-          clearTimeout(debounceTimer);
-          debounceTimer = null;
-        }
-        scrollTarget.removeEventListener("scroll", handleScrollActivity);
-        if ("onscrollend" in scrollTarget) {
-          scrollTarget.removeEventListener("scrollend", handleScrollEnd);
-        }
-        scrollCleanupRef.current = null;
-      };
-
-      const doUnlock = () => {
-        if (isUnlocked) return;
-        isUnlocked = true;
-        cleanup();
-        unlockScroll();
-      };
-
-      const resetDebounce = () => {
-        if (debounceTimer) {
-          clearTimeout(debounceTimer);
-        }
-        debounceTimer = setTimeout(doUnlock, SCROLL_IDLE_MS);
-      };
-
-      const handleScrollActivity = () => {
-        resetDebounce();
-      };
-
-      const handleScrollEnd = () => {
-        doUnlock();
-      };
-
-      scrollTarget.addEventListener("scroll", handleScrollActivity, {
-        passive: true,
-      });
-
-      if ("onscrollend" in scrollTarget) {
-        scrollTarget.addEventListener("scrollend", handleScrollEnd, {
-          once: true,
-        });
+      if (!lockActive) {
+        stopProgrammaticScroll();
+      } else if (scrollCleanupRef.current) {
+        scrollCleanupRef.current();
       }
 
-      scrollCleanupRef.current = cleanup;
+      const setupLock = () => {
+        const unlockScroll = () => {
+          isProgrammaticScrolling.current = false;
+        };
 
-      const scrollBehavior = getResolvedBehavior(scrollOptions?.behavior);
+        let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+        let isUnlocked = false;
+
+        const cleanup = () => {
+          if (debounceTimer) {
+            clearTimeout(debounceTimer);
+            debounceTimer = null;
+          }
+          scrollTarget.removeEventListener("scroll", handleScrollActivity);
+          if ("onscrollend" in scrollTarget) {
+            scrollTarget.removeEventListener("scrollend", handleScrollEnd);
+          }
+          scrollCleanupRef.current = null;
+        };
+
+        const doUnlock = () => {
+          if (isUnlocked) return;
+          isUnlocked = true;
+          cleanup();
+          unlockScroll();
+        };
+
+        const resetDebounce = () => {
+          if (debounceTimer) {
+            clearTimeout(debounceTimer);
+          }
+          debounceTimer = setTimeout(doUnlock, SCROLL_IDLE_MS);
+        };
+
+        const handleScrollActivity = () => {
+          resetDebounce();
+        };
+
+        const handleScrollEnd = () => {
+          doUnlock();
+        };
+
+        scrollTarget.addEventListener("scroll", handleScrollActivity, {
+          passive: true,
+        });
+
+        if ("onscrollend" in scrollTarget) {
+          scrollTarget.addEventListener("scrollend", handleScrollEnd, {
+            once: true,
+          });
+        }
+
+        scrollCleanupRef.current = cleanup;
+
+        return { doUnlock, resetDebounce };
+      };
+
+      const clampValue = (value: number, min: number, max: number): number =>
+        Math.max(min, Math.min(max, value));
+
+      let targetScroll: number | null = null;
+      let activeTargetId: string | null = null;
+
+      if (resolvedTarget.type === "id") {
+        const id = resolvedTarget.id;
+        if (!sectionIndexMap.has(id)) {
+          if (process.env.NODE_ENV !== "production") {
+            console.warn(`[domet] scrollTo: id "${id}" not found`);
+          }
+          return;
+        }
+
+        const currentSections = getCurrentSections();
+        const section = currentSections.find((s) => s.id === id);
+        if (!section) {
+          if (process.env.NODE_ENV !== "production") {
+            console.warn(`[domet] scrollTo: element for id "${id}" not yet mounted`);
+          }
+          return;
+        }
+
+        const elementRect = section.element.getBoundingClientRect();
+
+        const position: ScrollToPosition | undefined = scrollOptions?.position;
+
+        const sectionTop = container
+          ? elementRect.top - container.getBoundingClientRect().top + container.scrollTop
+          : elementRect.top + window.scrollY;
+        const sectionHeight = elementRect.height;
+
+        const calculateTargetScroll = (): number => {
+          if (maxScroll <= 0) return 0;
+
+          const topTarget = sectionTop - effectiveOffset;
+          const centerTarget = sectionTop - (viewportHeight - sectionHeight) / 2;
+          const bottomTarget = sectionTop + sectionHeight - viewportHeight;
+
+          if (position === "top") {
+            return clampValue(topTarget, 0, maxScroll);
+          }
+
+          if (position === "center") {
+            return clampValue(centerTarget, 0, maxScroll);
+          }
+
+          if (position === "bottom") {
+            return clampValue(bottomTarget, 0, maxScroll);
+          }
+
+          const fits = sectionHeight <= viewportHeight;
+
+          const dynamicRange = viewportHeight - effectiveOffset;
+          const denominator = dynamicRange !== 0 ? 1 + dynamicRange / maxScroll : 1;
+
+          const triggerMin = (sectionTop - effectiveOffset) / denominator;
+          const triggerMax = (sectionTop + sectionHeight - effectiveOffset) / denominator;
+
+          if (fits) {
+            if (centerTarget >= triggerMin && centerTarget <= triggerMax) {
+              return clampValue(centerTarget, 0, maxScroll);
+            }
+
+            if (centerTarget < triggerMin) {
+              return clampValue(triggerMin, 0, maxScroll);
+            }
+
+            return clampValue(triggerMax, 0, maxScroll);
+          }
+
+          return clampValue(topTarget, 0, maxScroll);
+        };
+
+        targetScroll = calculateTargetScroll();
+        activeTargetId = id;
+      } else {
+        const top = resolvedTarget.top;
+        if (!Number.isFinite(top)) {
+          if (process.env.NODE_ENV !== "production") {
+            console.warn(`[domet] scrollTo: top "${top}" is not a valid number`);
+          }
+          return;
+        }
+        targetScroll = clampValue(top - effectiveOffset, 0, maxScroll);
+      }
+
+      if (targetScroll === null) return;
+
+      if (lockActive) {
+        isProgrammaticScrolling.current = true;
+        if (activeTargetId) {
+          activeIdRef.current = activeTargetId;
+          setActiveId(activeTargetId);
+        }
+      }
+
+      const lockControls = lockActive ? setupLock() : null;
 
       if (container) {
-        const containerRect = container.getBoundingClientRect();
-        const relativeTop =
-          elementRect.top - containerRect.top + container.scrollTop;
         container.scrollTo({
-          top: relativeTop - effectiveOffset,
+          top: targetScroll,
           behavior: scrollBehavior,
         });
       } else {
-        const absoluteTop = elementRect.top + window.scrollY;
         window.scrollTo({
-          top: absoluteTop - effectiveOffset,
+          top: targetScroll,
           behavior: scrollBehavior,
         });
       }
 
-      if (scrollBehavior === "instant") {
-        doUnlock();
-      } else {
-        resetDebounce();
+      if (lockControls) {
+        if (scrollBehavior === "instant") {
+          lockControls.doUnlock();
+        } else {
+          lockControls.resetDebounce();
+        }
       }
     },
     [sectionIndexMap, containerElement, getResolvedBehavior, getCurrentSections],
   );
 
   const register = useCallback(
-    (id: string): RegisterProps => ({
-      id,
-      ref: registerRef(id),
-      "data-domet": id,
-    }),
+    (id: string): RegisterProps => {
+      const cached = registerPropsCache.current[id];
+      if (cached) return cached;
+
+      const props: RegisterProps = {
+        id,
+        ref: registerRef(id),
+        "data-domet": id,
+      };
+      registerPropsCache.current[id] = props;
+      return props;
+    },
     [registerRef],
   );
 
@@ -413,8 +621,8 @@ export function useDomet(options: DometOptions): UseDometReturn {
     const scrollHeight = container
       ? container.scrollHeight
       : document.documentElement.scrollHeight;
-    const maxScroll = Math.max(0, scrollHeight - viewportHeight);
-    const scrollProgress = maxScroll > 0 ? scrollY / maxScroll : 0;
+    const maxScroll = Math.max(1, scrollHeight - viewportHeight);
+    const scrollProgress = Math.min(1, Math.max(0, scrollY / maxScroll));
     const scrollDirection: "up" | "down" | null =
       scrollY === lastScrollY.current
         ? null
@@ -483,8 +691,8 @@ export function useDomet(options: DometOptions): UseDometReturn {
       prevSectionsInViewport.current = currentInViewport;
     }
 
-    const dynamicTriggerOffset =
-      effectiveOffset + scrollProgress * (viewportHeight - effectiveOffset * 2);
+    const triggerLine =
+      effectiveOffset + scrollProgress * (viewportHeight - effectiveOffset);
 
     const newScrollState: ScrollState = {
       y: scrollY,
@@ -495,7 +703,7 @@ export function useDomet(options: DometOptions): UseDometReturn {
       maxScroll,
       viewportHeight,
       offset: effectiveOffset,
-      triggerLine: dynamicTriggerOffset,
+      triggerLine,
     };
 
     const newSections: Record<string, SectionState> = {};
@@ -588,8 +796,7 @@ export function useDomet(options: DometOptions): UseDometReturn {
 
     const handleResize = (): void => {
       if (useSelector && selectorString) {
-        const resolved = resolveSectionsFromSelector(selectorString);
-        setResolvedSections(resolved);
+        updateSectionsFromSelector(selectorString);
       }
       scheduleCalculate();
     };
@@ -623,7 +830,7 @@ export function useDomet(options: DometOptions): UseDometReturn {
       isProgrammaticScrolling.current = false;
       isScrollingRef.current = false;
     };
-  }, [throttle, containerElement, useSelector, selectorString]);
+  }, [throttle, containerElement, useSelector, selectorString, updateSectionsFromSelector]);
 
   const index = useMemo(() => {
     if (!activeId) return -1;

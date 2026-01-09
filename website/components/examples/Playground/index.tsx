@@ -1,6 +1,6 @@
 "use client";
 
-import { useDomet } from "domet";
+import { useDomet, type ScrollToPosition } from "domet";
 import { useCallback, useMemo, useRef, useState } from "react";
 
 type LogEntry = {
@@ -41,13 +41,15 @@ export function Playground() {
   const [scrollBehavior, setScrollBehavior] = useState<
     "smooth" | "instant" | "auto"
   >("auto");
-  const [offset, setOffset] = useState<string>("8%");
+  const [offset, setOffset] = useState<string>("0");
   const [threshold, setThreshold] = useState(0.6);
   const [hysteresis, setHysteresis] = useState(150);
   const [sectionHeight, setSectionHeight] = useState<"full" | "half" | "third">("full");
+  const [scrollToPosition, setScrollToPosition] = useState<ScrollToPosition | "auto">("auto");
   const [showTriggerLine, setShowTriggerLine] = useState(true);
   const logIdRef = useRef(0);
   const containerRef = useRef<HTMLDivElement>(null);
+  const scrollStateRef = useRef({ y: 0, triggerLine: 0, maxScroll: 0 });
 
   const addLog = useCallback(
     (type: LogEntry["type"], message: string) => {
@@ -68,12 +70,12 @@ export function Playground() {
     const trimmed = offset.trim();
 
     if (trimmed === "") {
-      return { parsedOffset: "8%" as const, offsetError: null };
+      return { parsedOffset: 0 as const, offsetError: null };
     }
 
     if (!OFFSET_REGEX.test(trimmed)) {
       return {
-        parsedOffset: "8%" as const,
+        parsedOffset: 0 as const,
         offsetError: "Invalid format. Use a number (e.g. 100) or percentage (e.g. 10%)."
       };
     }
@@ -99,6 +101,11 @@ export function Playground() {
     return { parsedOffset: num, offsetError: null };
   }, [offset]);
 
+  const getScrollInfo = () => {
+    const s = scrollStateRef.current;
+    return `y=${Math.round(s.y)} trigger=${Math.round(s.triggerLine)} max=${Math.round(s.maxScroll)}`;
+  };
+
   const {
     active,
     index,
@@ -120,11 +127,11 @@ export function Playground() {
           hysteresis,
           behavior: scrollBehavior,
           onActive: (id, prevId) =>
-            addLog("active", `Active: ${prevId} → ${id}`),
-          onEnter: (id) => addLog("enter", `Enter: ${id}`),
-          onLeave: (id) => addLog("leave", `Leave: ${id}`),
-          onScrollStart: () => addLog("scrollStart", "Scroll started"),
-          onScrollEnd: () => addLog("scrollEnd", "Scroll ended"),
+            addLog("active", `${prevId} → ${id} (${getScrollInfo()})`),
+          onEnter: (id) => addLog("enter", `${id}`),
+          onLeave: (id) => addLog("leave", `${id}`),
+          onScrollStart: () => addLog("scrollStart", `Started (${getScrollInfo()})`),
+          onScrollEnd: () => addLog("scrollEnd", `Ended (${getScrollInfo()})`),
         }
       : {
           selector: "[data-playground-section]",
@@ -134,13 +141,19 @@ export function Playground() {
           hysteresis,
           behavior: scrollBehavior,
           onActive: (id, prevId) =>
-            addLog("active", `Active: ${prevId} → ${id}`),
-          onEnter: (id) => addLog("enter", `Enter: ${id}`),
-          onLeave: (id) => addLog("leave", `Leave: ${id}`),
-          onScrollStart: () => addLog("scrollStart", "Scroll started"),
-          onScrollEnd: () => addLog("scrollEnd", "Scroll ended"),
+            addLog("active", `${prevId} → ${id} (${getScrollInfo()})`),
+          onEnter: (id) => addLog("enter", `${id}`),
+          onLeave: (id) => addLog("leave", `${id}`),
+          onScrollStart: () => addLog("scrollStart", `Started (${getScrollInfo()})`),
+          onScrollEnd: () => addLog("scrollEnd", `Ended (${getScrollInfo()})`),
         },
   );
+
+  scrollStateRef.current = {
+    y: scroll.y,
+    triggerLine: scroll.triggerLine,
+    maxScroll: scroll.maxScroll,
+  };
 
   const handleAddSection = () => {
     setSectionCount((c) => Math.min(c + 1, 10));
@@ -153,8 +166,16 @@ export function Playground() {
   };
 
   const handleScrollTo = (id: string) => {
-    addLog("info", `scrollTo("${id}", { behavior: "${scrollBehavior}" })`);
-    scrollTo(id, { behavior: scrollBehavior });
+    const sectionState = sections[id];
+    const boundsInfo = sectionState
+      ? `target=${Math.round(sectionState.bounds.top)}-${Math.round(sectionState.bounds.bottom)}`
+      : "not mounted";
+    const posInfo = scrollToPosition !== "auto" ? ` position=${scrollToPosition}` : "";
+    addLog("info", `scrollTo("${id}")${posInfo} ${boundsInfo} from=${getScrollInfo()}`);
+    scrollTo(id, {
+      behavior: scrollBehavior,
+      position: scrollToPosition === "auto" ? undefined : scrollToPosition,
+    });
   };
 
   const clearLogs = () => setLogs([]);
@@ -260,6 +281,29 @@ export function Playground() {
                 <option value="smooth">smooth</option>
                 <option value="instant">instant</option>
               </select>
+            </div>
+
+            <div>
+              <label className="block text-xs text-zinc-500 mb-1">
+                ScrollTo Position
+              </label>
+              <select
+                value={scrollToPosition}
+                onChange={(e) =>
+                  setScrollToPosition(
+                    e.target.value as ScrollToPosition | "auto",
+                  )
+                }
+                className="w-full px-3 py-1.5 text-sm rounded bg-white border border-zinc-300 text-zinc-900"
+              >
+                <option value="auto">auto (trigger line)</option>
+                <option value="top">top</option>
+                <option value="center">center</option>
+                <option value="bottom">bottom</option>
+              </select>
+              <p className="text-xs text-zinc-400 mt-1">
+                Section alignment in viewport on scrollTo
+              </p>
             </div>
 
             <div>
@@ -411,16 +455,6 @@ export function Playground() {
         ref={containerRef}
         className="flex-1 overflow-y-auto bg-white relative"
       >
-        {showTriggerLine && (
-          <div
-            className="fixed pointer-events-none z-50 left-80 right-0 h-0.5 bg-red-500"
-            style={{ top: scroll.triggerLine }}
-          >
-            <span className="absolute right-2 -top-5 text-xs font-mono text-red-500 bg-white px-1 rounded">
-              trigger: {Math.round(scroll.triggerLine)}px ({((scroll.triggerLine / scroll.viewportHeight) * 100).toFixed(0)}%)
-            </span>
-          </div>
-        )}
         {sectionIds.map((id, i) => {
           const sectionState = sections[id];
           const isActive = active === id;

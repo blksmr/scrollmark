@@ -55,7 +55,7 @@ export function calculateSectionScores(
 
   const maxScroll = Math.max(1, ctx.scrollHeight - viewportHeight);
   const scrollProgress = Math.min(1, Math.max(0, scrollY / maxScroll));
-  const dynamicOffset = effectiveOffset + scrollProgress * (viewportHeight - effectiveOffset * 2);
+  const dynamicOffset = effectiveOffset + scrollProgress * (viewportHeight - effectiveOffset);
   const triggerLine = scrollY + dynamicOffset;
 
   const elementMap = new Map(sections.map((s) => [s.id, s.element]));

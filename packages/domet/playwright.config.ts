@@ -12,7 +12,7 @@ export default defineConfig({
     trace: 'on-first-retry',
   },
   webServer: {
-    command: 'npx vite --config src/__tests__/fixtures/vite.config.ts --port 3333',
+    command: 'npx vite --config src/__tests__/fixtures/vite.config.mts --port 3333',
     url: 'http://localhost:3333',
     reuseExistingServer: !process.env.CI,
   },

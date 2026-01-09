@@ -84,7 +84,7 @@ function Page() {
 | `sections` | `Record<string, SectionState>` | Per-section state indexed by ID |
 | `register` | `(id: string) => RegisterProps` | Props to spread on section elements (includes id, ref, data-domet) |
 | `link` | `(id: string) => LinkProps` | Props to spread on nav items |
-| `scrollTo` | `(id: string, options?: ScrollToOptions) => void` | Programmatically scroll to a section with optional offset and behavior override |
+| `scrollTo` | `(target: ScrollTarget, options?: ScrollToOptions) => void` | Programmatically scroll to a section or absolute scroll position |
 
 ### Types
 
@@ -127,14 +127,27 @@ type SectionBounds = {
 }
 ```
 
+### ScrollTarget
+
+Target input for programmatic scrolling.
+
+```ts showLineNumbers
+type ScrollTarget =
+  | string
+  | { id: string }
+  | { top: number }  // Absolute scroll position in px (offset is subtracted)
+```
+
 ### ScrollToOptions
 
 Options for programmatic scrolling.
 
 ```ts showLineNumbers
 type ScrollToOptions = {
-  offset?: number | `${number}%`  // Override trigger offset
+  offset?: number | `${number}%`            // Override trigger offset (applies to id/top targets)
   behavior?: 'smooth' | 'instant' | 'auto'  // Override scroll behavior
+  position?: 'top' | 'center' | 'bottom'    // Section alignment for ID targets only
+  lockActive?: boolean                      // Lock active section during programmatic scroll
 }
 ```
 

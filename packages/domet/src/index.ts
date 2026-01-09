@@ -1,3 +1,5 @@
+"use client";
+
 export type {
   DometOptions,
   LinkProps,
@@ -6,7 +8,9 @@ export type {
   ScrollBehavior,
   ScrollContainer,
   ScrollState,
+  ScrollTarget,
   ScrollToOptions,
+  ScrollToPosition,
   SectionBounds,
   SectionState,
   UseDometReturn,
