@@ -46,8 +46,8 @@ export default {
       },
       colors: {
         text: "var(--text)",
-        "text-muted": "var(--text-muted)",
-        "text-hover": "var(--text-hover)",
+        "muted": "var(--muted)",
+        "hover": "var(--hover)",
         border: "var(--border)",
         grey: "var(--grey)",
         primary: "var(--primary)",

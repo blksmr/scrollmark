@@ -58,7 +58,7 @@ function Page() {
 | `tracking` | `TrackingOptions` | `undefined` | Tracking configuration (offset, threshold, hysteresis, throttle) |
 | `scrolling` | `ScrollingOptions` | `undefined` | Default scroll behavior for link/scrollTo (behavior, offset, position, lockActive) |
 
-`tracking.offset` affects tracking (active section + trigger line). `scrolling.offset` only shifts programmatic scroll targets and defaults to `0`. Tracking defaults are `threshold: 0.6`, `hysteresis: 150`, and `throttle: 10` (ms). `scrolling.behavior` defaults to `auto`, which resolves to `smooth` unless `prefers-reduced-motion` is enabled (then `instant`).
+Note that `tracking.offset` affects tracking (active section + trigger line). `scrolling.offset` only shifts programmatic scroll targets and defaults to `0`. Tracking defaults are `threshold: 0.6`, `hysteresis: 150`, and `throttle: 10` (ms). `scrolling.behavior` defaults to `auto`, which resolves to `smooth` unless `prefers-reduced-motion` is enabled (then `instant`).
 
 IDs are sanitized: non-strings, empty values, and duplicates are ignored.
 

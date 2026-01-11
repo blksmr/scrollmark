@@ -31,7 +31,7 @@ export function PropTable({ items }: PropTableProps) {
               <tr className="w-full text-left font-default text-default">
                 <td className={cn(cellPadding, "font-mono text-fd-primary break-words")}><code className="break-words whitespace-normal">{item.name}</code></td>
                 <td className={cn(cellPadding, "font-mono text-fd-muted-foreground break-words")}><code className="break-words whitespace-normal">{item.type}</code></td>
-                <td className={cn(cellPadding, "font-mono text-fd-muted-foreground break-words", {'text-text-muted': !item.default})}>
+                <td className={cn(cellPadding, "font-mono text-fd-muted-foreground break-words", {'text-muted': !item.default})}>
                   {item.default ? <code className="break-words whitespace-normal">{item.default}</code> : '-'}
                 </td>
               </tr>
