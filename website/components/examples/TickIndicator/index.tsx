@@ -14,7 +14,7 @@ const SECTIONS = [
 
 const SECTION_IDS = SECTIONS.map((s) => s.id);
 const TICK_SPACING = 10;
-const HEADER_OFFSET = "10%";
+const HEADER_OFFSET = 96;
 
 export function TickIndicator() {
   const indicatorRef = useRef<HTMLDivElement>(null);
@@ -50,8 +50,11 @@ export function TickIndicator() {
     return (tickCount - 1) * TICK_SPACING;
   }, [tickCount]);
 
+  const adjustedProgress = scroll.maxScroll > 0
+    ? Math.min(1, scroll.progress + HEADER_OFFSET / scroll.maxScroll)
+    : scroll.progress;
   const activeTickIndex = tickCount > 1
-    ? Math.round(scroll.progress * (tickCount - 1))
+    ? Math.round(adjustedProgress * (tickCount - 1))
     : 0;
   const activePosition = activeTickIndex * TICK_SPACING;
 

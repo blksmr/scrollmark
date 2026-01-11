@@ -24,7 +24,7 @@ function ModalFormContent({ onClose }: ModalFormContentProps) {
     ids: SECTION_IDS,
     container: scrollContainerRef,
     tracking: { offset: 24 },
-    scrolling: { behavior: "smooth", position: "top" },
+    scrolling: { behavior: "smooth", position: "top", offset: 24 },
   });
 
   return (
@@ -453,7 +453,7 @@ export function ModalForm() {
   const [isOpen, setIsOpen] = useState(true);
   return (
     <>
-      <div className="flex min-h-[400px] items-center justify-center rounded-lg border border-dashed border-gray-300 bg-gray-50">
+      <div className="flex h-screen items-center justify-center">
         <button
           onClick={() => setIsOpen(true)}
           className="rounded-lg bg-gray-900 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-gray-800"
