@@ -1,6 +1,5 @@
 import { cn } from "@/lib/utils"
 import { Fragment } from "react"
-import { InfoCircledIcon } from "@radix-ui/react-icons"
 
 type Prop = {
   name: string
@@ -17,9 +16,9 @@ const cellPadding = "px-3 py-2"
 
 export function PropTable({ items }: PropTableProps) {
   return (
-    <div className="mt-6 w-full overflow-x-auto rounded-lg border border-border -webkit-overflow-scrolling-touch">
+    <div data-type="table" className="mt-6 w-full overflow-x-auto rounded-lg border border-border -webkit-overflow-scrolling-touch">
       <table className="min-w-[600px] w-full md:table-fixed md:min-w-full">
-        <thead className="border-border border-b bg-gray text-left font-default text-default">
+        <thead className="border-border border-b bg-grey text-left font-default text-default">
           <tr>
             <th className={cn(cellPadding, "md:w-[200px] font-normal text-small text-xs min-w-[140px]")}>Property</th>
             <th className={cn(cellPadding, "font-normal text-small text-xs")}>Type</th>
@@ -32,7 +31,7 @@ export function PropTable({ items }: PropTableProps) {
               <tr className="w-full text-left font-default text-default">
                 <td className={cn(cellPadding, "font-mono text-fd-primary break-words")}><code className="break-words whitespace-normal">{item.name}</code></td>
                 <td className={cn(cellPadding, "font-mono text-fd-muted-foreground break-words")}><code className="break-words whitespace-normal">{item.type}</code></td>
-                <td className={cn(cellPadding, "font-mono text-fd-muted-foreground break-words", {'text-text-muted': !item.default})}>
+                <td className={cn(cellPadding, "font-mono text-fd-muted-foreground break-words", {'text-muted': !item.default})}>
                   {item.default ? <code className="break-words whitespace-normal">{item.default}</code> : '-'}
                 </td>
               </tr>

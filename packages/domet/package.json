@@ -1,7 +1,7 @@
 {
   "name": "domet",
   "description": "A React hook for scroll tracking with smooth 60fps performance and smart hysteresis",
-  "version": "1.0.6",
+  "version": "1.1.0",
   "author": "blksmr",
   "repository": {
     "type": "git",
@@ -20,6 +20,7 @@
     "navigation",
     "active-section"
   ],
+  "sideEffects": false,
   "main": "./dist/cjs/index.js",
   "module": "./dist/es/index.mjs",
   "types": "./dist/cjs/index.d.ts",
@@ -34,7 +35,16 @@
         "default": "./dist/cjs/index.js"
       }
     },
-    "./useDomet": {}
+    "./useDomet": {},
+    "./constants": {},
+    "./resolvers": {},
+    "./scoring": {},
+    "./types": {},
+    "./validation": {},
+    "./utils": {},
+    "./utils/resolvers": {},
+    "./utils/scoring": {},
+    "./utils/validation": {}
   },
   "files": [
     "dist"
@@ -43,7 +53,7 @@
     "clean": "rm -rf dist",
     "dev": "bunchee -w",
     "build": "bunchee prepare && bunchee",
-    "lint": "biome check --fix --unsafe . --verbose",
+    "lint": "eslint . --fix",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",

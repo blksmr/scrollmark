@@ -1,11 +1,21 @@
+"use client";
+
 export type {
   DometOptions,
-  NavProps,
+  LinkProps,
+  Offset,
+  RegisterProps,
   ScrollBehavior,
+  ScrollContainer,
   ScrollState,
+  ScrollTarget,
+  ScrollToOptions,
+  ScrollToPosition,
+  ScrollingOptions,
   SectionBounds,
-  SectionProps,
   SectionState,
+  TrackingOptions,
   UseDometReturn,
-} from "./useDomet";
+} from "./types";
 export { default, useDomet } from "./useDomet";
+export { VALIDATION_LIMITS } from "./utils";

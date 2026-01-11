@@ -11,10 +11,12 @@ interface SyncResults {
 
 interface FrontmatterData {
   title?: string;
+  description?: string;
   [key: string]: string | undefined;
 }
 
 const sourceFile = path.join(__dirname, "../website/content/documentation.mdx");
+const siteConfigFile = path.join(__dirname, "../website/config/site.ts");
 const targetFiles: Record<string, string> = {
   "README.md": path.join(__dirname, "../README.md"),
   "website/public/llms.txt": path.join(__dirname, "../website/public/llms.txt"),
@@ -37,9 +39,13 @@ function extractFrontmatter(content: string): {
   const remainingContent = content.slice(frontmatterMatch[0].length);
 
   const titleMatch = frontmatterYaml.match(/title:\s*["']?(.*?)["']?\s*$/m);
+  const descMatch = frontmatterYaml.match(/description:\s*["']?(.*?)["']?\s*$/m);
   const frontmatter: FrontmatterData = {};
   if (titleMatch) {
     frontmatter.title = titleMatch[1];
+  }
+  if (descMatch) {
+    frontmatter.description = descMatch[1];
   }
 
   return { frontmatter, content: remainingContent };
@@ -53,16 +59,20 @@ function transformPropTable(match: string): string {
     description: string;
   }> = [];
 
-  const itemRegex =
-    /\{\s*name:\s*"([^"]+)",\s*type:\s*"([^"]+)"(?:,\s*default:\s*"([^"]*)")?,\s*description:\s*"([^"]+)"\s*\}/g;
+  const stringPattern = `"((?:[^"\\\\]|\\\\.)*)"`;
+  const itemRegex = new RegExp(
+    `\\{\\s*name:\\s*${stringPattern},\\s*type:\\s*${stringPattern}(?:,\\s*default:\\s*${stringPattern})?,\\s*description:\\s*${stringPattern}\\s*\\}`,
+    "g"
+  );
 
   let itemMatch: RegExpExecArray | null;
   while ((itemMatch = itemRegex.exec(match)) !== null) {
+    const unescape = (s: string) => s.replace(/\\(.)/g, "$1");
     items.push({
-      name: itemMatch[1],
-      type: itemMatch[2],
-      default: itemMatch[3],
-      description: itemMatch[4],
+      name: unescape(itemMatch[1]),
+      type: unescape(itemMatch[2]),
+      default: itemMatch[3] ? unescape(itemMatch[3]) : undefined,
+      description: unescape(itemMatch[4]),
     });
   }
 
@@ -70,7 +80,7 @@ function transformPropTable(match: string): string {
 
   const hasDefault = items.some((item) => item.default !== undefined);
 
-  const escapeType = (type: string) => type.replace(/\|/g, "\\|");
+  const escapeType = (type: string) => type.replace(/\|/g, "\\|").replace(/`/g, "\\`");
 
   if (hasDefault) {
     const header = "| Prop | Type | Default | Description |";
@@ -109,6 +119,28 @@ function transformContent(content: string): string {
   return `${transformed.trim()}\n`;
 }
 
+function updateSiteConfig(frontmatter: FrontmatterData): "success" | "error" {
+  try {
+    const content = fs.readFileSync(siteConfigFile, "utf8");
+    const title = frontmatter.title || "Domet";
+    const description = frontmatter.description || "A lightweight scroll spy hook for React";
+
+    let updated = content.replace(
+      /export const APP_NAME = ".*?";/,
+      `export const APP_NAME = "${title}";`
+    );
+    updated = updated.replace(
+      /export const APP_DESCRIPTION = ".*?";/,
+      `export const APP_DESCRIPTION = "${description}";`
+    );
+
+    fs.writeFileSync(siteConfigFile, updated);
+    return "success";
+  } catch {
+    return "error";
+  }
+}
+
 function formatTreeOutput(results: SyncResults): void {
   console.log("○ Syncing Documentation");
 
@@ -127,6 +159,12 @@ function syncDocumentation(): void {
 
   try {
     const sourceContent = fs.readFileSync(sourceFile, "utf8");
+    const { frontmatter } = extractFrontmatter(sourceContent);
+
+    results["website/config/site.ts"] = updateSiteConfig(frontmatter);
+    if (results["website/config/site.ts"] === "success") {
+      updatedFiles.push("website/config/site.ts");
+    }
 
     const transformedContent = transformContent(sourceContent);
 

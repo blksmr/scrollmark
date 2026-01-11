@@ -1,10 +1,12 @@
 {
   "name": "domet-monorepo",
   "version": "1.0.0",
+  "type": "module",
   "scripts": {
     "prepare": "husky",
     "dev": "turbo run dev",
     "test": "turbo run test",
+    "test:e2e": "npm run test:e2e -w packages/domet",
     "lint": "turbo run lint",
     "build": "turbo run build",
     "start": "cd website && npm run start",
@@ -17,10 +19,16 @@
     "website"
   ],
   "devDependencies": {
-    "@biomejs/biome": "^2.1.2",
+    "@eslint/js": "^9.28.0",
+    "@next/eslint-plugin-next": "^15.1.0",
+    "eslint": "^9.28.0",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "globals": "^16.2.0",
     "husky": "^9.1.7",
-    "turbo": "^2.5.4",
-    "typescript": "5.8.3"
+    "turbo": "^2.7.3",
+    "typescript": "5.8.3",
+    "typescript-eslint": "^8.33.1"
   },
   "packageManager": "npm@11.6.2"
 }
