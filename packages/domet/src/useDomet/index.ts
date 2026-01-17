@@ -1,4 +1,5 @@
 import {
+  startTransition,
   useCallback,
   useEffect,
   useMemo,
@@ -725,12 +726,16 @@ export function useDomet(options: DometOptions): UseDometReturn {
 
     if (!prevScrollStateRef.current || !areScrollStatesEqual(prevScrollStateRef.current, newScrollState)) {
       prevScrollStateRef.current = newScrollState;
-      setScroll(newScrollState);
+      startTransition(() => {
+        setScroll(newScrollState);
+      });
     }
 
     if (!prevSectionsStateRef.current || !areSectionsEqual(prevSectionsStateRef.current, newSections)) {
       prevSectionsStateRef.current = newSections;
-      setSections(newSections);
+      startTransition(() => {
+        setSections(newSections);
+      });
     }
   }, [
     sectionIds,
