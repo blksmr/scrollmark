@@ -63,7 +63,6 @@ export function buildSectionCache(
 export function getSectionBoundsFromCache(
   cache: CachedSectionPosition[],
   scrollY: number,
-  viewportHeight: number,
 ): InternalSectionBounds[] {
   return cache.map((cached) => {
     const viewportTop = cached.baseTop - scrollY;

@@ -659,7 +659,6 @@ export function useDomet(options: DometOptions): UseDometReturn {
     const sectionBounds = getSectionBoundsFromCache(
       sectionCacheRef.current,
       scrollY,
-      viewportHeight,
     );
     if (sectionBounds.length === 0) return;
 
