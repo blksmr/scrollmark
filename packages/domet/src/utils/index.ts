@@ -36,11 +36,10 @@ export function areSectionsEqual(
   a: Record<string, SectionState>,
   b: Record<string, SectionState>,
 ): boolean {
-  const keysA = Object.keys(a);
-  const keysB = Object.keys(b);
-  if (keysA.length !== keysB.length) return false;
-
-  for (const key of keysA) {
+  let countA = 0;
+  for (const key in a) {
+    if (!Object.prototype.hasOwnProperty.call(a, key)) continue;
+    countA++;
     const sA = a[key];
     const sB = b[key];
     if (!sB) return false;
@@ -56,7 +55,11 @@ export function areSectionsEqual(
       return false;
     }
   }
-  return true;
+  let countB = 0;
+  for (const key in b) {
+    if (Object.prototype.hasOwnProperty.call(b, key)) countB++;
+  }
+  return countA === countB;
 }
 
 export * from "./validation";

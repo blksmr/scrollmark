@@ -8,6 +8,7 @@ import {
 } from "react";
 
 import type {
+  CachedSectionPosition,
   DometOptions,
   LinkProps,
   RegisterProps,
@@ -31,7 +32,8 @@ import {
   resolveSectionsFromIds,
   resolveSectionsFromSelector,
   resolveOffset,
-  getSectionBounds,
+  buildSectionCache,
+  getSectionBoundsFromCache,
   calculateSectionScores,
   determineActiveSection,
   sanitizeOffset,
@@ -42,8 +44,6 @@ import {
   sanitizeSelector,
   useIsomorphicLayoutEffect,
   areIdInputsEqual,
-  areScrollStatesEqual,
-  areSectionsEqual,
 } from "../utils";
 
 
@@ -147,8 +147,11 @@ export function useDomet(options: DometOptions): UseDometReturn {
   const isScrollingRef = useRef<boolean>(false);
   const scrollIdleTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const prevSectionsInViewport = useRef<Set<string>>(new Set());
+  const currentSectionsInViewport = useRef<Set<string>>(new Set());
   const prevScrollStateRef = useRef<ScrollState | null>(null);
   const prevSectionsStateRef = useRef<Record<string, SectionState> | null>(null);
+  const sectionCacheRef = useRef<CachedSectionPosition[]>([]);
+  const cacheValidRef = useRef<boolean>(false);
   const recalculateRef = useRef<() => void>(() => {});
   const scheduleRecalculate = useCallback(() => {
     if (typeof window === "undefined") return;
@@ -213,6 +216,7 @@ export function useDomet(options: DometOptions): UseDometReturn {
   }, [containerInput, containerRefCurrent]);
 
   const updateSectionsFromSelector = useCallback((selector: string) => {
+    cacheValidRef.current = false;
     const resolved = resolveSectionsFromSelector(selector);
     setResolvedSections(resolved);
     if (resolved.length > 0) {
@@ -252,8 +256,10 @@ export function useDomet(options: DometOptions): UseDometReturn {
       }, 50);
     };
 
+    const observeTarget = containerElement ?? document.body;
+
     mutationObserverRef.current = new MutationObserver(handleMutation);
-    mutationObserverRef.current.observe(document.body, {
+    mutationObserverRef.current.observe(observeTarget, {
       childList: true,
       subtree: true,
       attributes: true,
@@ -270,7 +276,7 @@ export function useDomet(options: DometOptions): UseDometReturn {
         mutationObserverRef.current = null;
       }
     };
-  }, [useSelector, selectorString, updateSectionsFromSelector]);
+  }, [useSelector, selectorString, updateSectionsFromSelector, containerElement]);
 
   useEffect(() => {
     if (!useSelector && idsArray) {
@@ -311,6 +317,7 @@ export function useDomet(options: DometOptions): UseDometReturn {
       } else {
         delete refs.current[id];
       }
+      cacheValidRef.current = false;
       scheduleRecalculate();
     };
 
@@ -642,7 +649,18 @@ export function useDomet(options: DometOptions): UseDometReturn {
     lastScrollTime.current = now;
 
     const currentSections = getCurrentSections();
-    const sectionBounds = getSectionBounds(currentSections, container);
+    if (currentSections.length === 0) return;
+
+    if (!cacheValidRef.current || sectionCacheRef.current.length !== currentSections.length) {
+      sectionCacheRef.current = buildSectionCache(currentSections, container);
+      cacheValidRef.current = true;
+    }
+
+    const sectionBounds = getSectionBoundsFromCache(
+      sectionCacheRef.current,
+      scrollY,
+      viewportHeight,
+    );
     if (sectionBounds.length === 0) return;
 
     const effectiveOffset = resolveOffset(trackingOffset, viewportHeight, DEFAULT_OFFSET);
@@ -678,9 +696,11 @@ export function useDomet(options: DometOptions): UseDometReturn {
     }
 
     if (!isProgrammatic) {
-      const currentInViewport = new Set(
-        scores.filter((s) => s.inView).map((s) => s.id),
-      );
+      const currentInViewport = currentSectionsInViewport.current;
+      currentInViewport.clear();
+      for (const s of scores) {
+        if (s.inView) currentInViewport.add(s.id);
+      }
       const prevInViewport = prevSectionsInViewport.current;
 
       for (const id of currentInViewport) {
@@ -693,49 +713,108 @@ export function useDomet(options: DometOptions): UseDometReturn {
           callbackRefs.current.onLeave?.(id);
         }
       }
-      prevSectionsInViewport.current = currentInViewport;
+      const temp = prevSectionsInViewport.current;
+      prevSectionsInViewport.current = currentSectionsInViewport.current;
+      currentSectionsInViewport.current = temp;
     }
 
     const triggerLine = Math.round(
       effectiveOffset + scrollProgress * (viewportHeight - effectiveOffset)
     );
 
-    const newScrollState: ScrollState = {
-      y: Math.round(scrollY),
-      progress: Math.max(0, Math.min(1, scrollProgress)),
-      direction: scrollDirection,
-      velocity: Math.round(velocity),
-      scrolling: isScrollingRef.current,
-      maxScroll: Math.round(maxScroll),
-      viewportHeight: Math.round(viewportHeight),
-      trackingOffset: Math.round(effectiveOffset),
-      triggerLine,
-    };
+    const roundedY = Math.round(scrollY);
+    const clampedProgress = Math.max(0, Math.min(1, scrollProgress));
+    const roundedVelocity = Math.round(velocity);
+    const roundedMaxScroll = Math.round(maxScroll);
+    const roundedViewportHeight = Math.round(viewportHeight);
+    const roundedTrackingOffset = Math.round(effectiveOffset);
+    const currentScrolling = isScrollingRef.current;
 
-    const newSections: Record<string, SectionState> = {};
-    for (const s of scores) {
-      newSections[s.id] = {
-        bounds: {
-          top: Math.round(s.bounds.top),
-          bottom: Math.round(s.bounds.bottom),
-          height: Math.round(s.bounds.height),
-        },
-        visibility: Math.round(s.visibilityRatio * 100) / 100,
-        progress: Math.round(s.progress * 100) / 100,
-        inView: s.inView,
-        active: s.id === (isProgrammatic ? currentActiveId : newActiveId),
-        rect: s.rect,
+    const prev = prevScrollStateRef.current;
+    const scrollChanged = !prev ||
+      prev.y !== roundedY ||
+      prev.progress !== clampedProgress ||
+      prev.direction !== scrollDirection ||
+      prev.velocity !== roundedVelocity ||
+      prev.scrolling !== currentScrolling ||
+      prev.maxScroll !== roundedMaxScroll ||
+      prev.viewportHeight !== roundedViewportHeight ||
+      prev.trackingOffset !== roundedTrackingOffset ||
+      prev.triggerLine !== triggerLine;
+
+    if (scrollChanged) {
+      const newScrollState: ScrollState = {
+        y: roundedY,
+        progress: clampedProgress,
+        direction: scrollDirection,
+        velocity: roundedVelocity,
+        scrolling: currentScrolling,
+        maxScroll: roundedMaxScroll,
+        viewportHeight: roundedViewportHeight,
+        trackingOffset: roundedTrackingOffset,
+        triggerLine,
       };
-    }
-
-    if (!prevScrollStateRef.current || !areScrollStatesEqual(prevScrollStateRef.current, newScrollState)) {
       prevScrollStateRef.current = newScrollState;
       startTransition(() => {
         setScroll(newScrollState);
       });
     }
 
-    if (!prevSectionsStateRef.current || !areSectionsEqual(prevSectionsStateRef.current, newSections)) {
+    const prevSections = prevSectionsStateRef.current;
+    let sectionsChanged = !prevSections;
+
+    if (!sectionsChanged && prevSections) {
+      let countPrev = 0;
+      for (const key in prevSections) {
+        if (Object.prototype.hasOwnProperty.call(prevSections, key)) countPrev++;
+      }
+      if (countPrev !== scores.length) {
+        sectionsChanged = true;
+      } else {
+        for (const s of scores) {
+          const ps = prevSections[s.id];
+          if (!ps) {
+            sectionsChanged = true;
+            break;
+          }
+          const roundedVisibility = Math.round(s.visibilityRatio * 100) / 100;
+          const roundedProgress = Math.round(s.progress * 100) / 100;
+          const isActive = s.id === (isProgrammatic ? currentActiveId : newActiveId);
+          const roundedTop = Math.round(s.bounds.top);
+          const roundedBottom = Math.round(s.bounds.bottom);
+          const roundedHeight = Math.round(s.bounds.height);
+          if (
+            ps.visibility !== roundedVisibility ||
+            ps.progress !== roundedProgress ||
+            ps.inView !== s.inView ||
+            ps.active !== isActive ||
+            ps.bounds.top !== roundedTop ||
+            ps.bounds.bottom !== roundedBottom ||
+            ps.bounds.height !== roundedHeight
+          ) {
+            sectionsChanged = true;
+            break;
+          }
+        }
+      }
+    }
+
+    if (sectionsChanged) {
+      const newSections: Record<string, SectionState> = {};
+      for (const s of scores) {
+        newSections[s.id] = {
+          bounds: {
+            top: Math.round(s.bounds.top),
+            bottom: Math.round(s.bounds.bottom),
+            height: Math.round(s.bounds.height),
+          },
+          visibility: Math.round(s.visibilityRatio * 100) / 100,
+          progress: Math.round(s.progress * 100) / 100,
+          inView: s.inView,
+          active: s.id === (isProgrammatic ? currentActiveId : newActiveId),
+          rect: s.rect,
+        };
+      }
       prevSectionsStateRef.current = newSections;
       startTransition(() => {
         setSections(newSections);
@@ -801,6 +880,7 @@ export function useDomet(options: DometOptions): UseDometReturn {
     };
 
     const handleResize = (): void => {
+      cacheValidRef.current = false;
       if (useSelector && selectorString) {
         updateSectionsFromSelector(selectorString);
       }

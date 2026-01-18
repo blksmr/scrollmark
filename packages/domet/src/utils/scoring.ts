@@ -2,6 +2,7 @@ import type {
   InternalSectionBounds,
   SectionScore,
   ResolvedSection,
+  CachedSectionPosition,
 } from "../types";
 import { MIN_SCROLL_THRESHOLD, EDGE_TOLERANCE } from "../constants";
 
@@ -32,6 +33,68 @@ export function getSectionBounds(
       top: relativeTop,
       bottom: relativeTop + rect.height,
       height: rect.height,
+      rect,
+    };
+  });
+}
+
+export function buildSectionCache(
+  sections: ResolvedSection[],
+  container: HTMLElement | null,
+): CachedSectionPosition[] {
+  const scrollTop = container ? container.scrollTop : window.scrollY;
+  const containerTop = container ? container.getBoundingClientRect().top : 0;
+
+  return sections.map(({ id, element }) => {
+    const rect = element.getBoundingClientRect();
+    const baseTop = container
+      ? rect.top - containerTop + scrollTop
+      : rect.top + scrollTop;
+    return {
+      id,
+      baseTop,
+      height: rect.height,
+      width: rect.width,
+      left: rect.left,
+    };
+  });
+}
+
+export function getSectionBoundsFromCache(
+  cache: CachedSectionPosition[],
+  scrollY: number,
+  viewportHeight: number,
+): InternalSectionBounds[] {
+  return cache.map((cached) => {
+    const viewportTop = cached.baseTop - scrollY;
+    const rect = {
+      x: cached.left,
+      y: viewportTop,
+      width: cached.width,
+      height: cached.height,
+      top: viewportTop,
+      bottom: viewportTop + cached.height,
+      left: cached.left,
+      right: cached.left + cached.width,
+      toJSON() {
+        return {
+          x: this.x,
+          y: this.y,
+          width: this.width,
+          height: this.height,
+          top: this.top,
+          bottom: this.bottom,
+          left: this.left,
+          right: this.right,
+        };
+      },
+    } as DOMRect;
+
+    return {
+      id: cached.id,
+      top: cached.baseTop,
+      bottom: cached.baseTop + cached.height,
+      height: cached.height,
       rect,
     };
   });
@@ -125,7 +188,10 @@ export function determineActiveSection(
 ): string | null {
   if (scores.length === 0 || sectionIds.length === 0) return null;
 
-  const scoredIds = new Set(scores.map((s) => s.id));
+  const scoreMap = new Map<string, SectionScore>();
+  for (const s of scores) {
+    scoreMap.set(s.id, s);
+  }
 
   const maxScroll = Math.max(0, scrollHeight - viewportHeight);
   const hasScroll = maxScroll > MIN_SCROLL_THRESHOLD;
@@ -135,9 +201,9 @@ export function determineActiveSection(
   if (isAtBottom && sectionIds.length >= 2) {
     const lastId = sectionIds[sectionIds.length - 1];
     const secondLastId = sectionIds[sectionIds.length - 2];
-    const secondLastScore = scores.find((s) => s.id === secondLastId);
+    const secondLastScore = scoreMap.get(secondLastId);
     const secondLastNotVisible = !secondLastScore || !secondLastScore.inView;
-    if (scoredIds.has(lastId) && secondLastNotVisible) {
+    if (scoreMap.has(lastId) && secondLastNotVisible) {
       return lastId;
     }
   }
@@ -145,21 +211,32 @@ export function determineActiveSection(
   if (isAtTop && sectionIds.length >= 2) {
     const firstId = sectionIds[0];
     const secondId = sectionIds[1];
-    const secondScore = scores.find((s) => s.id === secondId);
+    const secondScore = scoreMap.get(secondId);
     const secondNotVisible = !secondScore || !secondScore.inView;
-    if (scoredIds.has(firstId) && secondNotVisible) {
+    if (scoreMap.has(firstId) && secondNotVisible) {
       return firstId;
     }
   }
 
-  const visibleScores = scores.filter((s) => s.inView);
-  const candidates = visibleScores.length > 0 ? visibleScores : scores;
-  const sorted = [...candidates].sort((a, b) => b.score - a.score);
+  let bestCandidate: SectionScore | null = null;
+  let hasVisibleCandidate = false;
 
-  if (sorted.length === 0) return null;
+  for (const s of scores) {
+    const isVisible = s.inView;
+    if (hasVisibleCandidate && !isVisible) continue;
+    if (!hasVisibleCandidate && isVisible) {
+      hasVisibleCandidate = true;
+      bestCandidate = s;
+      continue;
+    }
+    if (!bestCandidate || s.score > bestCandidate.score) {
+      bestCandidate = s;
+    }
+  }
 
-  const bestCandidate = sorted[0];
-  const currentScore = scores.find((s) => s.id === currentActiveId);
+  if (!bestCandidate) return null;
+
+  const currentScore = scoreMap.get(currentActiveId ?? "");
 
   const shouldSwitch =
     !currentScore ||

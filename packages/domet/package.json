@@ -44,7 +44,8 @@
     "./utils": {},
     "./utils/resolvers": {},
     "./utils/scoring": {},
-    "./utils/validation": {}
+    "./utils/validation": {},
+    "./utils/tracking": {}
   },
   "files": [
     "dist"

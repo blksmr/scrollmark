@@ -24,10 +24,15 @@ export function resolveSectionsFromSelector(
 
   try {
     const elements = document.querySelectorAll<HTMLElement>(selector);
-    return Array.from(elements).map((el, index) => ({
-      id: el.id || el.dataset.domet || `section-${index}`,
-      element: el,
-    }));
+    const result: ResolvedSection[] = [];
+    for (let i = 0; i < elements.length; i++) {
+      const el = elements[i];
+      result.push({
+        id: el.id || el.dataset.domet || `section-${i}`,
+        element: el,
+      });
+    }
+    return result;
   } catch {
     if (process.env.NODE_ENV !== "production") {
       console.warn(`[domet] Invalid CSS selector: "${selector}"`);

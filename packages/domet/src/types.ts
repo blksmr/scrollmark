@@ -122,3 +122,11 @@ export type SectionScore = {
   progress: number;
   rect: DOMRect | null;
 };
+
+export type CachedSectionPosition = {
+  id: string;
+  baseTop: number;
+  height: number;
+  width: number;
+  left: number;
+};
