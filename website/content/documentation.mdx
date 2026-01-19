@@ -63,7 +63,11 @@ function Page() {
   { name: "scrolling", type: "ScrollingOptions", default: "undefined", description: "Default scroll behavior for link/scrollTo (behavior, offset, position, lockActive)" },
 ]} />
 
-Note that `tracking.offset` affects tracking (active section + trigger line). `scrolling.offset` only shifts programmatic scroll targets and defaults to `0`. Tracking defaults are `threshold: 0.6`, `hysteresis: 150`, and `throttle: 10` (ms). `scrolling.behavior` defaults to `auto`, which resolves to `smooth` unless `prefers-reduced-motion` is enabled (then `instant`).
+`tracking.offset` and `scrolling.offset` serve different purposes:
+- **`tracking.offset`**: Defines the trigger line position (where section detection happens). A value of `100` means the line sits 100px from the top of the viewport. Sections crossing this line are candidates for "active".
+- **`scrolling.offset`**: Only affects programmatic scrolling (`link`/`scrollTo`). It shifts where the section lands after navigation. Has no effect on detection.
+
+Tracking defaults are `threshold: 0.6`, `hysteresis: 150`, and `throttle: 10` (ms). `scrolling.behavior` defaults to `auto`, which resolves to `smooth` unless `prefers-reduced-motion` is enabled (then `instant`).
 
 IDs are sanitized: non-strings, empty values, and duplicates are ignored.
 
